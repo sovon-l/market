@@ -1,0 +1,3 @@
+[submodule "market_definition"]
+	path = market_definition
+	url = ../market_definition/

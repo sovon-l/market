@@ -1,0 +1,10 @@
+[package]
+name = "proper_market_api"
+version = "0.1.0"
+authors = ["sbetool"]
+description = "for market data transfer"
+edition = "2018"
+
+[lib]
+name = "proper_market_api"
+path = "src/lib.rs"
