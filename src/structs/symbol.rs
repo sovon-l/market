@@ -1,4 +1,3 @@
-// TODO: symbol type should combine with expiry to take leverage of rust enum?
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 pub struct Symbol {

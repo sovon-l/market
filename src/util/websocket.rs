@@ -49,7 +49,6 @@ pub fn work<T: WssState>(
             }
         };
 
-        // TODO: add initial messages
         for msg in state.init_messages().into_iter() {
             wss.write_message(msg).unwrap();
         }
@@ -72,6 +71,7 @@ pub fn work<T: WssState>(
     }
 }
 
+// TODO: should use annotation similar as above but async fn
 pub async fn awork<T: WssState>(
     address: String,
     mut action: impl FnMut(
