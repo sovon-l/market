@@ -9,6 +9,32 @@ pub struct State {
     >,
 }
 
+macro_rules! handle_exchange_state {
+    ($state:expr, $insts:expr, $sender:expr, $enum:expr, $runner:expr) => {
+        let exch_state = $state
+            .handles
+            .entry($enum)
+            .or_insert((std::collections::HashSet::new(), vec![]));
+        let exch_insts = $insts
+            .iter()
+            .filter(|i| i.exchange == $enum)
+            .map(|s| *s)
+            .collect();
+        if exch_state.0 != exch_insts {
+            for handle in exch_state.1.iter() {
+                handle.abort();
+            }
+            let mut handles = vec![];
+            let tokio_tasks = $runner($sender.clone(), &exch_insts);
+            for tokio_task in tokio_tasks.into_iter() {
+                handles.push(tokio::spawn(tokio_task));
+            }
+            exch_state.0 = exch_insts.into_iter().collect();
+            exch_state.1 = handles;
+        }
+    };
+}
+
 pub async fn work(
     sender: crossbeam_channel::Sender<crate::message::Message>,
     state: std::sync::Arc<tokio::sync::Mutex<State>>,
@@ -16,50 +42,21 @@ pub async fn work(
 ) {
     let mut state = state.lock().await;
 
-    let binance_state = state
-        .handles
-        .entry(proper_market_api::Exchange::binance)
-        .or_insert((std::collections::HashSet::new(), vec![]));
-    let binance_insts = insts
-        .iter()
-        .filter(|i| i.exchange == proper_market_api::Exchange::binance)
-        .map(|s| *s)
-        .collect();
-    if binance_state.0 != binance_insts {
-        for handle in binance_state.1.iter() {
-            handle.abort();
-        }
-        let mut handles = vec![];
-        let tokio_tasks =
-            crate::data::exchange::binance::r#async::run(sender.clone(), &binance_insts);
-        for tokio_task in tokio_tasks.into_iter() {
-            handles.push(tokio::spawn(tokio_task));
-        }
-        binance_state.0 = binance_insts.into_iter().collect();
-        binance_state.1 = handles;
-    }
+    handle_exchange_state!(
+        state,
+        insts,
+        sender,
+        proper_market_api::Exchange::binance,
+        crate::data::exchange::binance::r#async::run
+    );
 
-    let ftx_state = state
-        .handles
-        .entry(proper_market_api::Exchange::ftx)
-        .or_insert((std::collections::HashSet::new(), vec![]));
-    let ftx_insts = insts
-        .iter()
-        .filter(|i| i.exchange == proper_market_api::Exchange::ftx)
-        .map(|s| *s)
-        .collect();
-    if ftx_state.0 != ftx_insts {
-        for handle in ftx_state.1.iter() {
-            handle.abort();
-        }
-        let mut handles = vec![];
-        let tokio_tasks = crate::data::exchange::ftx::r#async::run(sender.clone(), &ftx_insts);
-        for tokio_task in tokio_tasks.into_iter() {
-            handles.push(tokio::spawn(tokio_task));
-        }
-        ftx_state.0 = ftx_insts.into_iter().collect();
-        ftx_state.1 = handles;
-    }
+    handle_exchange_state!(
+        state,
+        insts,
+        sender,
+        proper_market_api::Exchange::ftx,
+        crate::data::exchange::ftx::r#async::run
+    );
 
     // crate::ftx::run(sender.clone(), insts.iter().filter(|i| i.exchange == proper_market_api::Exchange::ftx).map(|s| *s).collect());
 }

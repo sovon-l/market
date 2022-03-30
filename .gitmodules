@@ -1,3 +1,6 @@
 [submodule "market_definition"]
 	path = market_definition
 	url = ../market_definition/
+[submodule "messenger"]
+	path = messenger
+	url = ../messenger/

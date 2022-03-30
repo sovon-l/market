@@ -5,18 +5,31 @@ lazy_static::lazy_static! {
 }
 
 fn main() {
-    simple_logger::init_with_level(log::Level::Info).unwrap();
+    if std::env::var("RUST_LOG").is_err() {
+        std::env::set_var("RUST_LOG", "info");
+    }
 
-    log::info!("{}", serde_json::json!({"msg":"start async publisher"}).to_string());
+    simple_logger::SimpleLogger::new()
+        .env()
+        .with_utc_timestamps()
+        .init()
+        .unwrap();
+
+    log::info!(
+        "{}",
+        serde_json::json!({"msg":"start async publisher"}).to_string()
+    );
 
     let m = std::sync::Arc::new(std::sync::Mutex::new(zmq::Context::new()));
 
     let (sender, receiver) = crossbeam_channel::unbounded();
     let m_clone = m.clone();
     let _ = std::thread::spawn(move || {
-        market::data::publisher::publisher(m_clone, receiver, |s| {
-            s.bind(&MARKET_PUBLISHER_PUBLISH_ADDRESS).unwrap();
-        });
+        let ctx = m_clone.lock().unwrap();
+        let socket = ctx.socket(zmq::PUB).unwrap();
+        socket.bind(&MARKET_PUBLISHER_PUBLISH_ADDRESS).unwrap();
+
+        messenger::publisher::publisher_loop(receiver, socket);
     });
 
     let runtime = match tokio::runtime::Builder::new_multi_thread()

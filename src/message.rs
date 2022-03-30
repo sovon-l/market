@@ -13,7 +13,11 @@ impl Into<zmq::Message> for Message {
     }
 }
 
-// pub fn encode_message() {}
+impl From<Vec<u8>> for Message {
+    fn from(item: Vec<u8>) -> Self {
+        decode_message(&item)
+    }
+}
 
 pub fn decode_message(v: &[u8]) -> Message {
     let buf = proper_market_api::ReadBuf::new(v);
@@ -22,7 +26,7 @@ pub fn decode_message(v: &[u8]) -> Message {
     let schema_id = header.schema_id();
     let version = header.version();
 
-    // TODO: decode should pass &[u8] without header
+    // TODO: decode should pass &[u8] without header?
     match (schema_id, version, template_id) {
         (1, 1, 1) => Message::BboMsg(crate::structs::market_price::decode_market_price(v)),
         (1, 1, 2) => Message::TradesMsg(crate::structs::trades::decode_trades(v)),
