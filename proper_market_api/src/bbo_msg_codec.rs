@@ -3,7 +3,7 @@ use crate::*;
 pub use encoder::*;
 pub use decoder::*;
 
-pub const SBE_BLOCK_LENGTH: u16 = 60;
+pub const SBE_BLOCK_LENGTH: u16 = 70;
 pub const SBE_TEMPLATE_ID: u16 = 1;
 pub const SBE_SCHEMA_ID: u16 = 1;
 pub const SBE_SCHEMA_VERSION: u16 = 1;
@@ -75,11 +75,11 @@ pub mod encoder {
         /// - null value: -1
         /// - characterEncoding: null
         /// - semanticType: null
-        /// - encodedOffset: 8
+        /// - encodedOffset: 18
         /// - encodedLength: 8
         #[inline]
         pub fn market_timestamp(&mut self, value: u64) {
-            let offset = self.offset + 8;
+            let offset = self.offset + 18;
             self.get_buf_mut().put_u64_at(offset, value);
         }
 
@@ -89,39 +89,39 @@ pub mod encoder {
         /// - null value: -1
         /// - characterEncoding: null
         /// - semanticType: null
-        /// - encodedOffset: 16
+        /// - encodedOffset: 26
         /// - encodedLength: 8
         #[inline]
         pub fn timestamp(&mut self, value: u64) {
-            let offset = self.offset + 16;
+            let offset = self.offset + 26;
             self.get_buf_mut().put_u64_at(offset, value);
         }
 
         /// COMPOSITE ENCODER
         #[inline]
         pub fn bid_price_encoder(self) -> DecEncoder<Self> {
-            let offset = self.offset + 24;
+            let offset = self.offset + 34;
             DecEncoder::default().wrap(self, offset)
         }
 
         /// COMPOSITE ENCODER
         #[inline]
         pub fn bid_size_encoder(self) -> DecEncoder<Self> {
-            let offset = self.offset + 33;
+            let offset = self.offset + 43;
             DecEncoder::default().wrap(self, offset)
         }
 
         /// COMPOSITE ENCODER
         #[inline]
         pub fn ask_price_encoder(self) -> DecEncoder<Self> {
-            let offset = self.offset + 42;
+            let offset = self.offset + 52;
             DecEncoder::default().wrap(self, offset)
         }
 
         /// COMPOSITE ENCODER
         #[inline]
         pub fn ask_size_encoder(self) -> DecEncoder<Self> {
-            let offset = self.offset + 51;
+            let offset = self.offset + 61;
             DecEncoder::default().wrap(self, offset)
         }
 
@@ -207,13 +207,13 @@ pub mod decoder {
         /// primitive field - 'REQUIRED'
         #[inline]
         pub fn market_timestamp(&self) -> u64 {
-            self.get_buf().get_u64_at(self.offset + 8)
+            self.get_buf().get_u64_at(self.offset + 18)
         }
 
         /// primitive field - 'OPTIONAL' { null_value: '-1' }
         #[inline]
         pub fn timestamp(&self) -> Option<u64> {
-            let value = self.get_buf().get_u64_at(self.offset + 16);
+            let value = self.get_buf().get_u64_at(self.offset + 26);
             if value == 0xffffffffffffffff_u64 {
                 None
             } else {
@@ -224,28 +224,28 @@ pub mod decoder {
         /// COMPOSITE DECODER
         #[inline]
         pub fn bid_price_decoder(self) -> DecDecoder<Self> {
-            let offset = self.offset + 24;
+            let offset = self.offset + 34;
             DecDecoder::default().wrap(self, offset)
         }
 
         /// COMPOSITE DECODER
         #[inline]
         pub fn bid_size_decoder(self) -> DecDecoder<Self> {
-            let offset = self.offset + 33;
+            let offset = self.offset + 43;
             DecDecoder::default().wrap(self, offset)
         }
 
         /// COMPOSITE DECODER
         #[inline]
         pub fn ask_price_decoder(self) -> DecDecoder<Self> {
-            let offset = self.offset + 42;
+            let offset = self.offset + 52;
             DecDecoder::default().wrap(self, offset)
         }
 
         /// COMPOSITE DECODER
         #[inline]
         pub fn ask_size_decoder(self) -> DecDecoder<Self> {
-            let offset = self.offset + 51;
+            let offset = self.offset + 61;
             DecDecoder::default().wrap(self, offset)
         }
 

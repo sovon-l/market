@@ -2,8 +2,8 @@
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 pub struct Symbol {
     pub exchange: proper_market_api::Exchange,
-    pub base: proper_market_api::Asset,
-    pub quote: proper_market_api::Asset,
+    pub base: [u8; 6],
+    pub quote: [u8; 6],
     pub symbol_type: SymbolType,
 }
 
@@ -11,26 +11,6 @@ pub struct Symbol {
 pub enum SymbolType {
     Spot,
     Future(Option<u32>),
-}
-
-fn asset_to_str(a: &proper_market_api::Asset) -> &'static str {
-    match a {
-        proper_market_api::Asset::btc => "btc",
-        proper_market_api::Asset::usd => "usd",
-        proper_market_api::Asset::usdt => "usdt",
-        proper_market_api::Asset::eth => "eth",
-        a => panic!("unexpected asset {:?}", a),
-    }
-}
-
-fn str_to_asset(a: &str) -> proper_market_api::Asset {
-    match &a[..] {
-        "btc" => proper_market_api::Asset::btc,
-        "usd" => proper_market_api::Asset::usd,
-        "usdt" => proper_market_api::Asset::usdt,
-        "eth" => proper_market_api::Asset::eth,
-        a => panic!("unexpected asset {:?}", a),
-    }
 }
 
 impl std::fmt::Display for Symbol {
@@ -43,8 +23,8 @@ impl std::fmt::Display for Symbol {
                 proper_market_api::Exchange::ftx => "ftx",
                 _ => panic!(),
             },
-            asset_to_str(&self.base),
-            asset_to_str(&self.quote),
+            std::str::from_utf8(&self.base).unwrap(),
+            std::str::from_utf8(&self.quote).unwrap(),
             match self.symbol_type {
                 SymbolType::Spot => "0".to_string(),
                 SymbolType::Future(expiry) => match expiry {
@@ -75,8 +55,8 @@ impl std::str::FromStr for Symbol {
                 "ftx" => proper_market_api::Exchange::ftx,
                 _ => return Err(()),
             },
-            base: str_to_asset(parts[0]),
-            quote: str_to_asset(parts[1]),
+            base: crate::util::symbol::str_to_asset(parts[0]),
+            quote: crate::util::symbol::str_to_asset(parts[1]),
             symbol_type: if tokens.len() < 2 {
                 SymbolType::Spot
             } else {

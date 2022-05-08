@@ -3,7 +3,7 @@ use crate::*;
 pub use encoder::*;
 pub use decoder::*;
 
-pub const ENCODED_LENGTH: usize = 8;
+pub const ENCODED_LENGTH: usize = 18;
 
 pub mod encoder {
     use super::*;
@@ -44,24 +44,52 @@ pub mod encoder {
             self.get_buf_mut().put_u8_at(offset, value as u8)
         }
 
-        /// REQUIRED enum
+        /// primitive array field 'quote'
+        /// - min value: 32
+        /// - max value: 126
+        /// - null value: 0
+        /// - characterEncoding: US-ASCII
+        /// - semanticType: null
+        /// - encodedOffset: 1
+        /// - encodedLength: 6
+        /// - version: 0
         #[inline]
-        pub fn quote(&mut self, value: Asset) {
+        pub fn quote(&mut self, value: [u8; 6]) {
             let offset = self.offset + 1;
-            self.get_buf_mut().put_u8_at(offset, value as u8)
+            let buf = self.get_buf_mut();
+            buf.put_u8_at(offset, value[0]);
+            buf.put_u8_at(offset + 1, value[1]);
+            buf.put_u8_at(offset + 2, value[2]);
+            buf.put_u8_at(offset + 3, value[3]);
+            buf.put_u8_at(offset + 4, value[4]);
+            buf.put_u8_at(offset + 5, value[5]);
         }
 
-        /// REQUIRED enum
+        /// primitive array field 'base'
+        /// - min value: 32
+        /// - max value: 126
+        /// - null value: 0
+        /// - characterEncoding: US-ASCII
+        /// - semanticType: null
+        /// - encodedOffset: 7
+        /// - encodedLength: 6
+        /// - version: 0
         #[inline]
-        pub fn base(&mut self, value: Asset) {
-            let offset = self.offset + 2;
-            self.get_buf_mut().put_u8_at(offset, value as u8)
+        pub fn base(&mut self, value: [u8; 6]) {
+            let offset = self.offset + 7;
+            let buf = self.get_buf_mut();
+            buf.put_u8_at(offset, value[0]);
+            buf.put_u8_at(offset + 1, value[1]);
+            buf.put_u8_at(offset + 2, value[2]);
+            buf.put_u8_at(offset + 3, value[3]);
+            buf.put_u8_at(offset + 4, value[4]);
+            buf.put_u8_at(offset + 5, value[5]);
         }
 
         /// REQUIRED enum
         #[inline]
         pub fn symbol_type(&mut self, value: SymbolType) {
-            let offset = self.offset + 3;
+            let offset = self.offset + 13;
             self.get_buf_mut().put_u8_at(offset, value as u8)
         }
 
@@ -71,11 +99,11 @@ pub mod encoder {
         /// - null value: 4294967295
         /// - characterEncoding: null
         /// - semanticType: null
-        /// - encodedOffset: 4
+        /// - encodedOffset: 14
         /// - encodedLength: 4
         #[inline]
         pub fn expiry(&mut self, value: u32) {
-            let offset = self.offset + 4;
+            let offset = self.offset + 14;
             self.get_buf_mut().put_u32_at(offset, value);
         }
 
@@ -116,28 +144,42 @@ pub mod decoder {
             self.get_buf().get_u8_at(self.offset).into()
         }
 
-        /// REQUIRED enum
         #[inline]
-        pub fn quote(&self) -> Asset {
-            self.get_buf().get_u8_at(self.offset + 1).into()
+        pub fn quote(&self) -> [u8; 6] {
+            let buf = self.get_buf();
+            [
+                buf.get_u8_at(self.offset + 1),
+                buf.get_u8_at(self.offset + 1 + 1),
+                buf.get_u8_at(self.offset + 1 + 2),
+                buf.get_u8_at(self.offset + 1 + 3),
+                buf.get_u8_at(self.offset + 1 + 4),
+                buf.get_u8_at(self.offset + 1 + 5),
+            ]
         }
 
-        /// REQUIRED enum
         #[inline]
-        pub fn base(&self) -> Asset {
-            self.get_buf().get_u8_at(self.offset + 2).into()
+        pub fn base(&self) -> [u8; 6] {
+            let buf = self.get_buf();
+            [
+                buf.get_u8_at(self.offset + 7),
+                buf.get_u8_at(self.offset + 7 + 1),
+                buf.get_u8_at(self.offset + 7 + 2),
+                buf.get_u8_at(self.offset + 7 + 3),
+                buf.get_u8_at(self.offset + 7 + 4),
+                buf.get_u8_at(self.offset + 7 + 5),
+            ]
         }
 
         /// REQUIRED enum
         #[inline]
         pub fn symbol_type(&self) -> SymbolType {
-            self.get_buf().get_u8_at(self.offset + 3).into()
+            self.get_buf().get_u8_at(self.offset + 13).into()
         }
 
         /// primitive field - 'OPTIONAL' { null_value: '4294967295' }
         #[inline]
         pub fn expiry(&self) -> Option<u32> {
-            let value = self.get_buf().get_u32_at(self.offset + 4);
+            let value = self.get_buf().get_u32_at(self.offset + 14);
             if value == 0xffffffff_u32 {
                 None
             } else {

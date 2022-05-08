@@ -3,7 +3,7 @@ use crate::*;
 pub use encoder::*;
 pub use decoder::*;
 
-pub const SBE_BLOCK_LENGTH: u16 = 16;
+pub const SBE_BLOCK_LENGTH: u16 = 26;
 pub const SBE_TEMPLATE_ID: u16 = 2;
 pub const SBE_SCHEMA_ID: u16 = 1;
 pub const SBE_SCHEMA_VERSION: u16 = 1;
@@ -75,11 +75,11 @@ pub mod encoder {
         /// - null value: -1
         /// - characterEncoding: null
         /// - semanticType: null
-        /// - encodedOffset: 8
+        /// - encodedOffset: 18
         /// - encodedLength: 8
         #[inline]
         pub fn market_timestamp(&mut self, value: u64) {
-            let offset = self.offset + 8;
+            let offset = self.offset + 18;
             self.get_buf_mut().put_u64_at(offset, value);
         }
 
@@ -279,7 +279,7 @@ pub mod decoder {
         /// primitive field - 'REQUIRED'
         #[inline]
         pub fn market_timestamp(&self) -> u64 {
-            self.get_buf().get_u64_at(self.offset + 8)
+            self.get_buf().get_u64_at(self.offset + 18)
         }
 
         /// GROUP DECODER
@@ -339,7 +339,7 @@ pub mod decoder {
             self
         }
 
-        /// group token - Token{signal=BEGIN_GROUP, name='trades', referencedName='null', description='null', id=3, version=0, deprecated=0, encodedLength=26, offset=16, componentTokenCount=21, encoding=Encoding{presence=REQUIRED, primitiveType=null, byteOrder=LITTLE_ENDIAN, minValue=null, maxValue=null, nullValue=null, constValue=null, characterEncoding='null', epoch='null', timeUnit=null, semanticType='null'}}
+        /// group token - Token{signal=BEGIN_GROUP, name='trades', referencedName='null', description='null', id=3, version=0, deprecated=0, encodedLength=26, offset=26, componentTokenCount=21, encoding=Encoding{presence=REQUIRED, primitiveType=null, byteOrder=LITTLE_ENDIAN, minValue=null, maxValue=null, nullValue=null, constValue=null, characterEncoding='null', epoch='null', timeUnit=null, semanticType='null'}}
         #[inline]
         pub fn parent(&mut self) -> SbeResult<P> {
             self.parent.take().ok_or(SbeErr::ParentNotSet)
