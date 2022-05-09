@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: proper-market
+  labels:
+    proper.orbb.li/product: market
+spec:
+  containers:
+  - name: proper-market
+    image: registry.proper.orbb.li/proper/market:latest
+    env:
+    - name: MARKET_PUBLISHER_TOKIO_THREAD
+      value: "1"
+    ports:
+      - containerPort: 7800
+        name: input
+      - containerPort: 8000
+        name: publish
+  imagePullSecrets:
+  - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proper-market-input
+spec:
+  type: ClusterIP
+  ports:
+  - port: 7800
+    name: input
+    targetPort: input
+  selector:
+    proper.orbb.li/product: market
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proper-market-publish
+spec:
+  ports:
+  - port: 8000
+    name: publish
+    targetPort: publish
+  selector:
+    proper.orbb.li/product: market
