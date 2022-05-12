@@ -30,7 +30,7 @@ impl crate::util::websocket::WssState for State {
             .map(|s| {
                 tokio_tungstenite::tungstenite::Message::text(format!(
                     r#"{{"op":"subscribe","channel":"ticker","market":"{}"}}"#,
-                    crate::data::exchange::ftx::serde::se_symbol(&s)
+                    crate::data::exchange::ftx::serde::se_symbol(s)
                 ))
             })
             .collect()

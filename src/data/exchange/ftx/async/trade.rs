@@ -31,7 +31,7 @@ impl crate::util::websocket::WssState for State {
             .map(|s| {
                 tokio_tungstenite::tungstenite::Message::text(format!(
                     r#"{{"op":"subscribe","channel":"trades","market":"{}"}}"#,
-                    crate::data::exchange::ftx::serde::se_symbol(&s)
+                    crate::data::exchange::ftx::serde::se_symbol(s)
                 ))
             })
             .collect()
@@ -118,10 +118,8 @@ pub fn wss(
                 })
                 .collect();
 
-            let mut n = 0;
-            for i in trades.iter_mut() {
-                i.timestamp += n;
-                n += 1;
+            for (n, i) in trades.iter_mut().enumerate() {
+                i.timestamp += n as u64;
             }
 
             sender

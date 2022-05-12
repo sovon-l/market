@@ -4,9 +4,9 @@ pub enum Message {
     TradesMsg(crate::structs::trades::Trades),
 }
 
-impl Into<zmq::Message> for Message {
-    fn into(self) -> zmq::Message {
-        match self {
+impl From<Message> for zmq::Message {
+    fn from(s: Message) -> zmq::Message {
+        match s {
             Message::BboMsg(msg) => msg.into(),
             Message::TradesMsg(msg) => msg.into(),
         }

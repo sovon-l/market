@@ -53,6 +53,7 @@ pub fn wss(
                 }
             }
             tokio_tungstenite::tungstenite::Message::Ping(ts) => {
+                log::debug!("recv ping {:?}", ts);
                 wss.write_message(tokio_tungstenite::tungstenite::Message::Pong(ts))
                     .unwrap();
                 return;

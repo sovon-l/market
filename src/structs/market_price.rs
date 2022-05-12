@@ -9,14 +9,14 @@ pub struct MarketPrice {
     pub ask_size: rust_decimal::Decimal,
 }
 
-impl Into<zmq::Message> for MarketPrice {
-    fn into(self) -> zmq::Message {
+impl From<MarketPrice> for zmq::Message {
+    fn from(s: MarketPrice) -> zmq::Message {
         let mut buffer = vec![
             0u8;
             proper_market_api::bbo_msg_codec::SBE_BLOCK_LENGTH as usize
                 + proper_market_api::message_header_codec::ENCODED_LENGTH
         ];
-        encode_market_price(&mut buffer, self);
+        encode_market_price(&mut buffer, s);
         zmq::Message::from(buffer)
     }
 }

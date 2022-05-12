@@ -8,7 +8,7 @@ pub fn run(
     let mut rt = Vec::<futures::future::BoxFuture<'static, ()>>::new();
 
     let sender_clone = sender.clone();
-    let insts_clone = instruments.iter().map(|i| i.clone()).collect();
+    let insts_clone = instruments.iter().copied().collect();
     let awork = crate::util::websocket::awork(
         crate::env_var::MARKET_FTX_WSS.to_string(),
         bbo::wss(sender_clone),
@@ -16,11 +16,10 @@ pub fn run(
     );
     rt.push(Box::pin(awork));
 
-    let sender_clone = sender.clone();
-    let insts_clone = instruments.iter().map(|i| i.clone()).collect();
+    let insts_clone = instruments.iter().copied().collect();
     let awork = crate::util::websocket::awork(
         crate::env_var::MARKET_FTX_WSS.to_string(),
-        trade::wss(sender_clone),
+        trade::wss(sender),
         trade::State { insts: insts_clone },
     );
     rt.push(Box::pin(awork));

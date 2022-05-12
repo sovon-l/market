@@ -13,8 +13,8 @@ pub struct Trade {
     // tradeId: u32,
 }
 
-impl Into<zmq::Message> for Trades {
-    fn into(self) -> zmq::Message {
+impl From<Trades> for zmq::Message {
+    fn from(s: Trades) -> zmq::Message {
         let mut buffer = vec![
             0u8;
             proper_market_api::message_header_codec::ENCODED_LENGTH
@@ -22,10 +22,10 @@ impl Into<zmq::Message> for Trades {
                 + proper_market_api::trade_msg_codec::TradesEncoder::<
                     proper_market_api::trade_msg_codec::TradeMsgEncoder,
                 >::block_length() as usize
-                    * self.trades.len()
+                    * s.trades.len()
                 + 3
         ];
-        encode_trades(&mut buffer, self);
+        encode_trades(&mut buffer, s);
         zmq::Message::from(buffer)
     }
 }

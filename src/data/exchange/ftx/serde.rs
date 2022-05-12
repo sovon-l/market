@@ -5,7 +5,7 @@ pub fn de_ccy(s: &str) -> [u8; 6] {
 pub fn de_symbol(s: &str) -> Option<crate::structs::symbol::Symbol> {
     let symbol = s;
     if symbol.find('-').is_some() {
-        if symbol.find("move").is_some() {
+        if symbol.contains("move") {
             return None;
         }
         let v: Vec<&str> = symbol.split('-').collect();

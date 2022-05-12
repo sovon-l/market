@@ -40,12 +40,12 @@ impl std::str::FromStr for Symbol {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let splits: Vec<&str> = s.split(":").collect();
+        let splits: Vec<&str> = s.split(':').collect();
         if splits.len() < 2 {
             return Err(());
         }
-        let tokens: Vec<&str> = splits[1].split("-").collect();
-        let parts: Vec<&str> = tokens[0].split("_").collect();
+        let tokens: Vec<&str> = splits[1].split('-').collect();
+        let parts: Vec<&str> = tokens[0].split('_').collect();
         if parts.len() < 2 {
             return Err(());
         }
@@ -60,7 +60,7 @@ impl std::str::FromStr for Symbol {
             symbol_type: if tokens.len() < 2 {
                 SymbolType::Spot
             } else {
-                let splits: Vec<&str> = tokens[1].split("_").collect();
+                let splits: Vec<&str> = tokens[1].split('_').collect();
                 match splits[0] {
                     "0" => SymbolType::Spot,
                     "1" => SymbolType::Future(if splits.len() < 2 {
