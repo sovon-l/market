@@ -1,6 +1,6 @@
 [submodule "market_definition"]
 	path = market_definition
-	url = git@gitlab.proper.orbb.li:proper/market_definition.git
+	url = git@github.com:proper-fin/market_definition.git
 [submodule "messenger"]
 	path = messenger
-	url = git@gitlab.proper.orbb.li:proper/messenger.git
+	url = git@github.com:proper-fin/messenger.git
