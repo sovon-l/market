@@ -20,7 +20,7 @@ struct WssData {
 }
 
 pub struct State {
-    pub insts: Vec<crate::structs::symbol::Symbol>,
+    pub insts: Vec<crate::structs::instrument::Instrument>,
 }
 
 impl crate::util::websocket::WssState for State {
@@ -30,7 +30,7 @@ impl crate::util::websocket::WssState for State {
             .map(|s| {
                 tokio_tungstenite::tungstenite::Message::text(format!(
                     r#"{{"op":"subscribe","channel":"ticker","market":"{}"}}"#,
-                    crate::data::exchange::ftx::serde::se_symbol(&s)
+                    crate::data::exchange::ftx::serde::se_inst(&s)
                 ))
             })
             .collect()
@@ -72,7 +72,7 @@ pub fn wss(
                 ask,
                 askSize,
             } = data;
-            let symbol = if let Some(s) = crate::data::exchange::ftx::serde::de_symbol(&market) {
+            let symbol = if let Some(s) = crate::data::exchange::ftx::serde::de_inst(&market) {
                 s
             } else {
                 log::error!("error parsing symbol: {}", market);

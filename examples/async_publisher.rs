@@ -86,7 +86,7 @@ async fn amain(sender: crossbeam_channel::Sender<market::message::Message>) {
                                 let rt: Vec<&str> = rt;
                                 let insts = rt
                                     .iter()
-                                    .map(|s| market::structs::symbol::Symbol::from_str(s))
+                                    .map(|s| market::structs::instrument::Instrument::from_str(s))
                                     .filter(|v| v.is_ok())
                                     .map(|v| v.unwrap())
                                     .collect();

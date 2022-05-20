@@ -3,7 +3,7 @@ pub mod trade;
 
 pub fn run(
     sender: crossbeam_channel::Sender<crate::message::Message>,
-    instruments: &std::collections::HashSet<crate::structs::symbol::Symbol>,
+    instruments: &std::collections::HashSet<crate::structs::instrument::Instrument>,
 ) -> Vec<futures::future::BoxFuture<'static, ()>> {
     let mut rt = Vec::<futures::future::BoxFuture<'static, ()>>::new();
 

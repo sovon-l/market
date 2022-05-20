@@ -3,7 +3,7 @@ pub struct State {
     handles: std::collections::HashMap<
         proper_market_api::Exchange,
         (
-            std::collections::HashSet<crate::structs::symbol::Symbol>,
+            std::collections::HashSet<crate::structs::instrument::Instrument>,
             Vec<tokio::task::JoinHandle<()>>,
         ),
     >,
@@ -38,7 +38,7 @@ macro_rules! handle_exchange_state {
 pub async fn work(
     sender: crossbeam_channel::Sender<crate::message::Message>,
     state: std::sync::Arc<tokio::sync::Mutex<State>>,
-    insts: Vec<crate::structs::symbol::Symbol>,
+    insts: Vec<crate::structs::instrument::Instrument>,
 ) {
     let mut state = state.lock().await;
 

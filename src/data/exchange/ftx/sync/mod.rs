@@ -3,7 +3,7 @@ pub mod trade;
 
 pub fn run(
     sender: crossbeam_channel::Sender<crate::message::Message>,
-    instruments: Vec<crate::structs::symbol::Symbol>,
+    instruments: Vec<crate::structs::instrument::Instrument>,
 ) {
     let sender_clone = sender.clone();
     let insts_clone = instruments.clone();

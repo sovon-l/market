@@ -1,19 +1,19 @@
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
-pub struct Symbol {
+pub struct Instrument {
     pub exchange: proper_market_api::Exchange,
     pub base: [u8; 6],
     pub quote: [u8; 6],
-    pub symbol_type: SymbolType,
+    pub instrument_type: InstrumentType,
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
-pub enum SymbolType {
+pub enum InstrumentType {
     Spot,
     Future(Option<u32>),
 }
 
-impl std::fmt::Display for Symbol {
+impl std::fmt::Display for Instrument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -25,9 +25,9 @@ impl std::fmt::Display for Symbol {
             },
             std::str::from_utf8(&self.base).unwrap(),
             std::str::from_utf8(&self.quote).unwrap(),
-            match self.symbol_type {
-                SymbolType::Spot => "0".to_string(),
-                SymbolType::Future(expiry) => match expiry {
+            match self.instrument_type {
+                InstrumentType::Spot => "0".to_string(),
+                InstrumentType::Future(expiry) => match expiry {
                     Some(expiry) => format!("1_{}", expiry),
                     None => "1".to_string(),
                 },
@@ -36,7 +36,7 @@ impl std::fmt::Display for Symbol {
     }
 }
 
-impl std::str::FromStr for Symbol {
+impl std::str::FromStr for Instrument {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -49,7 +49,7 @@ impl std::str::FromStr for Symbol {
         if parts.len() < 2 {
             return Err(());
         }
-        Ok(Symbol {
+        Ok(Instrument {
             exchange: match splits[0] {
                 "binance" => proper_market_api::Exchange::binance,
                 "ftx" => proper_market_api::Exchange::ftx,
@@ -57,13 +57,13 @@ impl std::str::FromStr for Symbol {
             },
             base: crate::util::symbol::str_to_asset(parts[0]),
             quote: crate::util::symbol::str_to_asset(parts[1]),
-            symbol_type: if tokens.len() < 2 {
-                SymbolType::Spot
+            instrument_type: if tokens.len() < 2 {
+                InstrumentType::Spot
             } else {
                 let splits: Vec<&str> = tokens[1].split("_").collect();
                 match splits[0] {
-                    "0" => SymbolType::Spot,
-                    "1" => SymbolType::Future(if splits.len() < 2 {
+                    "0" => InstrumentType::Spot,
+                    "1" => InstrumentType::Future(if splits.len() < 2 {
                         None
                     } else {
                         Some(if let Ok(v) = splits[1].parse() {
@@ -79,41 +79,41 @@ impl std::str::FromStr for Symbol {
     }
 }
 
-pub fn encode_symbol<'a, T: proper_market_api::Writer<'a> + std::default::Default>(
-    s: Symbol,
-    symbol_e: &mut proper_market_api::SymbolEncoder<T>,
+pub fn encode_instrument<'a, T: proper_market_api::Writer<'a> + std::default::Default>(
+    s: Instrument,
+    instrument_e: &mut proper_market_api::InstrumentEncoder<T>,
 ) {
-    let Symbol {
+    let Instrument {
         exchange,
         quote,
         base,
-        symbol_type,
+        instrument_type,
     } = s;
-    symbol_e.exchange(exchange);
-    symbol_e.quote(quote);
-    symbol_e.base(base);
-    match symbol_type {
-        SymbolType::Spot => symbol_e.symbol_type(proper_market_api::symbol_type::SymbolType::spot),
-        SymbolType::Future(expiry) => {
-            symbol_e.symbol_type(proper_market_api::symbol_type::SymbolType::future);
+    instrument_e.exchange(exchange);
+    instrument_e.quote(quote);
+    instrument_e.base(base);
+    match instrument_type {
+        InstrumentType::Spot => instrument_e.instrument_type(proper_market_api::instrument_type::InstrumentType::spot),
+        InstrumentType::Future(expiry) => {
+            instrument_e.instrument_type(proper_market_api::instrument_type::InstrumentType::future);
             if let Some(expiry) = expiry {
-                symbol_e.expiry(expiry);
+                instrument_e.expiry(expiry);
             }
         }
     }
 }
 
-pub fn decode_symbol<'a, T: proper_market_api::Reader<'a> + std::default::Default>(
-    symbol_d: &mut proper_market_api::SymbolDecoder<T>,
-) -> Symbol {
-    Symbol {
-        exchange: symbol_d.exchange(),
-        quote: symbol_d.quote(),
-        base: symbol_d.base(),
-        symbol_type: match symbol_d.symbol_type() {
-            proper_market_api::symbol_type::SymbolType::spot => SymbolType::Spot,
-            proper_market_api::symbol_type::SymbolType::future => {
-                SymbolType::Future(symbol_d.expiry())
+pub fn decode_instrument<'a, T: proper_market_api::Reader<'a> + std::default::Default>(
+    instrument_d: &mut proper_market_api::InstrumentDecoder<T>,
+) -> Instrument {
+    Instrument {
+        exchange: instrument_d.exchange(),
+        quote: instrument_d.quote(),
+        base: instrument_d.base(),
+        instrument_type: match instrument_d.instrument_type() {
+            proper_market_api::instrument_type::InstrumentType::spot => InstrumentType::Spot,
+            proper_market_api::instrument_type::InstrumentType::future => {
+                InstrumentType::Future(instrument_d.expiry())
             }
             _ => panic!(),
         },

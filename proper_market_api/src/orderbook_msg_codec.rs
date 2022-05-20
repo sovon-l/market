@@ -64,9 +64,9 @@ pub mod encoder {
 
         /// COMPOSITE ENCODER
         #[inline]
-        pub fn symbol_encoder(self) -> SymbolEncoder<Self> {
+        pub fn instrument_encoder(self) -> InstrumentEncoder<Self> {
             let offset = self.offset;
-            SymbolEncoder::default().wrap(self, offset)
+            InstrumentEncoder::default().wrap(self, offset)
         }
 
         /// primitive field 'market_timestamp'
@@ -277,9 +277,9 @@ pub mod decoder {
 
         /// COMPOSITE DECODER
         #[inline]
-        pub fn symbol_decoder(self) -> SymbolDecoder<Self> {
+        pub fn instrument_decoder(self) -> InstrumentDecoder<Self> {
             let offset = self.offset;
-            SymbolDecoder::default().wrap(self, offset)
+            InstrumentDecoder::default().wrap(self, offset)
         }
 
         /// primitive field - 'REQUIRED'

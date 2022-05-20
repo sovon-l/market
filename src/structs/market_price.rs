@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 pub struct MarketPrice {
-    pub symbol: crate::structs::symbol::Symbol,
+    pub symbol: crate::structs::instrument::Instrument,
     pub market_timestamp: u64,
     pub timestamp: Option<u64>, // ns
     pub bid_price: rust_decimal::Decimal,
@@ -38,8 +38,8 @@ pub fn encode_market_price(buffer: &mut [u8], mp: MarketPrice) {
         proper_market_api::message_header_codec::ENCODED_LENGTH,
     );
     bbo_msg = bbo_msg.header(0).parent().unwrap();
-    let mut symbol_e = bbo_msg.symbol_encoder();
-    crate::structs::symbol::encode_symbol(symbol, &mut symbol_e);
+    let mut symbol_e = bbo_msg.instrument_encoder();
+    crate::structs::instrument::encode_instrument(symbol, &mut symbol_e);
     bbo_msg = symbol_e.parent().unwrap();
 
     bbo_msg.market_timestamp(market_timestamp);
@@ -78,8 +78,8 @@ pub fn decode_market_price(v: &[u8]) -> MarketPrice {
     let header = proper_market_api::MessageHeaderDecoder::default().wrap(buf, 0);
     bbo_msg_d = bbo_msg_d.header(header);
 
-    let mut symbol_d = bbo_msg_d.symbol_decoder();
-    let symbol = crate::structs::symbol::decode_symbol(&mut symbol_d);
+    let mut symbol_d = bbo_msg_d.instrument_decoder();
+    let symbol = crate::structs::instrument::decode_instrument(&mut symbol_d);
     bbo_msg_d = symbol_d.parent().unwrap();
 
     let mut bid_price_d = bbo_msg_d.bid_price_decoder();

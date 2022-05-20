@@ -2,7 +2,7 @@ pub fn de_ccy(s: &str) -> [u8; 6] {
     crate::util::symbol::str_to_asset(s)
 }
 
-pub fn de_symbol(s: &str) -> Option<crate::structs::symbol::Symbol> {
+pub fn de_inst(s: &str) -> Option<crate::structs::instrument::Instrument> {
     let symbol = s;
     if symbol.find('-').is_some() {
         if symbol.find("move").is_some() {
@@ -11,25 +11,25 @@ pub fn de_symbol(s: &str) -> Option<crate::structs::symbol::Symbol> {
         let v: Vec<&str> = symbol.split('-').collect();
         let (base, quote) = (v[0], v[1]);
         if quote == "PERP" {
-            Some(crate::structs::symbol::Symbol {
+            Some(crate::structs::instrument::Instrument {
                 exchange: proper_market_api::Exchange::ftx,
                 base: de_ccy(base),
                 quote: de_ccy("usd"),
-                symbol_type: crate::structs::symbol::SymbolType::Future(None),
+                instrument_type: crate::structs::instrument::InstrumentType::Future(None),
             })
         } else if quote.chars().next().unwrap().is_digit(10) {
-            Some(crate::structs::symbol::Symbol {
+            Some(crate::structs::instrument::Instrument {
                 exchange: proper_market_api::Exchange::ftx,
                 base: de_ccy(base),
                 quote: de_ccy("usd"),
-                symbol_type: crate::structs::symbol::SymbolType::Future(Some(0)), // TODO: mmdd to unix epoch
+                instrument_type: crate::structs::instrument::InstrumentType::Future(Some(0)), // TODO: mmdd to unix epoch
             })
         } else {
-            Some(crate::structs::symbol::Symbol {
+            Some(crate::structs::instrument::Instrument {
                 exchange: proper_market_api::Exchange::ftx,
                 base: de_ccy(base),
                 quote: de_ccy(quote),
-                symbol_type: crate::structs::symbol::SymbolType::Future(None),
+                instrument_type: crate::structs::instrument::InstrumentType::Future(None),
             })
         }
     } else {
@@ -39,11 +39,11 @@ pub fn de_symbol(s: &str) -> Option<crate::structs::symbol::Symbol> {
         }
         let (base, quote) = (v[0], v[1]);
 
-        Some(crate::structs::symbol::Symbol {
+        Some(crate::structs::instrument::Instrument {
             exchange: proper_market_api::Exchange::ftx,
             base: de_ccy(base),
             quote: de_ccy(quote),
-            symbol_type: crate::structs::symbol::SymbolType::Spot,
+            instrument_type: crate::structs::instrument::InstrumentType::Spot,
         })
     }
 }
@@ -52,12 +52,12 @@ pub fn se_ccy(a: &[u8; 6]) -> String {
     crate::util::symbol::asset_to_str(a).to_owned()
 }
 
-pub fn se_symbol(s: &crate::structs::symbol::Symbol) -> String {
-    match s.symbol_type {
-        crate::structs::symbol::SymbolType::Spot => {
+pub fn se_inst(s: &crate::structs::instrument::Instrument) -> String {
+    match s.instrument_type {
+        crate::structs::instrument::InstrumentType::Spot => {
             format!("{}/{}", se_ccy(&s.base), se_ccy(&s.quote))
         }
-        crate::structs::symbol::SymbolType::Future(expiry) => {
+        crate::structs::instrument::InstrumentType::Future(expiry) => {
             if let Some(expiry) = expiry {
                 format!(
                     "{}-{}",

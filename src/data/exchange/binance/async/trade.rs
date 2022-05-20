@@ -87,7 +87,7 @@ pub fn wss(
         let WssData {
             T, s, p, mut q, m, ..
         } = data;
-        let symbol = if let Some(s) = crate::data::exchange::binance::serde::de_symbol(&s) {
+        let symbol = if let Some(s) = crate::data::exchange::binance::serde::de_inst(&s) {
             s
         } else {
             log::error!(

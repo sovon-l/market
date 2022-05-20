@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 pub struct Trades {
-    pub symbol: crate::structs::symbol::Symbol,
+    pub symbol: crate::structs::instrument::Instrument,
     pub market_timestamp: u64,
     pub trades: Vec<Trade>,
 }
@@ -43,8 +43,8 @@ pub fn encode_trades(buffer: &mut [u8], ts: Trades) {
         proper_market_api::message_header_codec::ENCODED_LENGTH,
     );
     trades_msg = trades_msg.header(0).parent().unwrap();
-    let mut symbol_e = trades_msg.symbol_encoder();
-    crate::structs::symbol::encode_symbol(symbol, &mut symbol_e);
+    let mut symbol_e = trades_msg.instrument_encoder();
+    crate::structs::instrument::encode_instrument(symbol, &mut symbol_e);
     trades_msg = symbol_e.parent().unwrap();
 
     trades_msg.market_timestamp(market_timestamp);
@@ -80,8 +80,8 @@ pub fn decode_trades(v: &[u8]) -> Trades {
     let header = proper_market_api::MessageHeaderDecoder::default().wrap(buf, 0);
     trades_msg_d = trades_msg_d.header(header);
 
-    let mut symbol_d = trades_msg_d.symbol_decoder();
-    let symbol = crate::structs::symbol::decode_symbol(&mut symbol_d);
+    let mut symbol_d = trades_msg_d.instrument_decoder();
+    let symbol = crate::structs::instrument::decode_instrument(&mut symbol_d);
     trades_msg_d = symbol_d.parent().unwrap();
 
     let market_timestamp = trades_msg_d.market_timestamp();
