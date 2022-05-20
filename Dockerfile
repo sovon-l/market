@@ -1,7 +1,6 @@
-FROM rust:1.59
+FROM rust:1.60
 
-RUN apt update
-RUN apt install libzmq3-dev -y
+RUN apt update && apt install libzmq3-dev -y
 
 WORKDIR /home
 COPY . .

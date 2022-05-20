@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: market-deployment
+  labels:
+    proper.orbb.li/product: market
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      proper.orbb.li/product: market
+  template:
+    metadata:
+      labels:
+        proper.orbb.li/product: market
+    spec:
+      containers:
+      - name: proper-market
+        image: registry.proper.orbb.li/proper/market:latest
+        env:
+        - name: MARKET_PUBLISHER_TOKIO_THREAD
+          value: "1"
+        ports:
+          - containerPort: 7800
+            name: input
+          - containerPort: 8000
+            name: publish
+      - name: proper-market-storer
+        image: registry.proper.orbb.li/proper/market_storer:latest
+        env:
+        - name: MARKET_STORER_ZMQ_URL
+          value: "tcp://proper-market-publish:8000"
+        - name: MARKET_STORER_INFLUX_URL
+          value: "http://influxdb2:8086"
+        - name: MARKET_STORER_INFLUX_TOKEN
+          value: "GPKM1nk9biiTHAJEI4enyCCqskFJuxfYs65rETgGwSNqqTQgdnF2-MhYPVRTNh7IDWPS9LPWQJH0HMJcb0GLdg=="
+        - name: MARKET_STORER_INFLUX_ORG_NAME
+          value: "primary"
+        - name: MARKET_STORER_INFLUX_BUCKET
+          value: "market_rawdata"
+      imagePullSecrets:
+      - name: regcred

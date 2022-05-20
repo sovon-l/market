@@ -118,10 +118,8 @@ pub fn wss(
                 })
                 .collect();
 
-            let mut n = 0;
-            for i in trades.iter_mut() {
-                i.timestamp += n;
-                n += 1;
+            for (n, i) in trades.iter_mut().enumerate() {
+                i.timestamp += n as u64;
             }
 
             sender

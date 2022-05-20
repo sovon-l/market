@@ -18,15 +18,13 @@ pub fn run(
         })
         .unwrap();
 
-    let sender_clone = sender.clone();
-    let insts_clone = instruments.clone();
     std::thread::Builder::new()
         .name("ftx trades".into())
         .spawn(move || {
             crate::util::websocket::work(
                 &*crate::env_var::MARKET_FTX_WSS,
-                trade::wss(sender_clone),
-                trade::State { insts: insts_clone },
+                trade::wss(sender),
+                trade::State { insts: instruments },
             )
         })
         .unwrap();
