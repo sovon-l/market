@@ -1,6 +1,3 @@
 [submodule "market_definition"]
 	path = market_definition
 	url = git@github.com:proper-fin/market_definition.git
-[submodule "messenger"]
-	path = messenger
-	url = git@github.com:proper-fin/messenger.git
