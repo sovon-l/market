@@ -10,10 +10,8 @@ pub mod exchange;
 pub mod trade_msg_codec;
 pub mod dec_codec;
 pub mod message_header_codec;
-pub mod symbol_codec;
 pub mod instrument_type;
 pub mod orderbook_flags;
-pub mod symbol_type;
 pub mod instrument_codec;
 
 pub use orderbook_msg_codec::*;
@@ -23,10 +21,8 @@ pub use exchange::*;
 pub use trade_msg_codec::*;
 pub use dec_codec::*;
 pub use message_header_codec::*;
-pub use symbol_codec::*;
 pub use instrument_type::*;
 pub use orderbook_flags::*;
-pub use symbol_type::*;
 pub use instrument_codec::*;
 
 pub type SbeResult<T> = core::result::Result<T, SbeErr>;
