@@ -61,58 +61,49 @@ async fn amain(sender: crossbeam_channel::Sender<market::message::Message>) {
         market::data::controller::State::default(),
     ));
 
-    let make_svc = hyper::service::make_service_fn(move |_conn| {
-        let sender = sender.clone();
-        let state = state.clone();
-        async {
-            Ok::<_, std::convert::Infallible>(hyper::service::service_fn(
-                move |req: hyper::Request<hyper::Body>| {
-                    let sender = sender.clone();
-                    let state = state.clone();
-                    async move {
-                        let mut resp = hyper::Response::default();
+    let sender = std::sync::Arc::new(sender);
 
-                        let mut correct = false;
-                        if let Ok(bytes) = hyper::body::to_bytes(req.into_body()).await {
-                            let rt = serde_json::from_slice(&bytes);
-                            if let Ok(rt) = rt {
-                                log::info!(
-                                    "{}",
-                                    serde_json::json!({
-                                        "http_recv": rt,
-                                    })
-                                    .to_string()
-                                );
-                                let rt: Vec<&str> = rt;
-                                let insts = rt
-                                    .iter()
-                                    .map(|s| market::structs::instrument::Instrument::from_str(s))
-                                    .filter(|v| v.is_ok())
-                                    .map(|v| v.unwrap())
-                                    .collect();
-                                market::data::controller::work(sender, state, insts).await;
-                                correct = true
-                            }
-                        }
-                        if !correct {
-                            *resp.status_mut() = hyper::StatusCode::BAD_REQUEST;
-                        }
-                        std::result::Result::<hyper::Response<hyper::Body>, std::convert::Infallible>::Ok(resp)
-                    }
-                },
-            ))
-        }
-    });
+    let app = axum::Router::new().route(
+        "/",
+        axum::routing::post({
+            let state = std::sync::Arc::clone(&state);
+            let sender = std::sync::Arc::clone(&sender);
+            move |body| {
+                monitor_instances(
+                    body,
+                    std::sync::Arc::clone(&state),
+                    std::sync::Arc::clone(&sender),
+                )
+            }
+        }),
+    );
 
-    let server = hyper::Server::bind(&addr).serve(make_svc);
+    if let Err(e) = axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+    {
+        log::error!(
+            "{}",
+            serde_json::json!({
+                "error": e.to_string(),
+            })
+            .to_string()
+        );
+    };
+}
 
-    let graceful = server.with_graceful_shutdown(async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("failed to install CTRL+C signal handler");
-    });
-
-    if let Err(e) = graceful.await {
-        log::error!("{}", e);
-    }
+async fn monitor_instances(
+    axum::Json(payload): axum::Json<Vec<String>>,
+    state: std::sync::Arc<tokio::sync::Mutex<market::data::controller::State>>,
+    mut sender: std::sync::Arc<crossbeam_channel::Sender<market::message::Message>>,
+) {
+    use std::str::FromStr;
+    let insts: Vec<market::structs::instrument::Instrument> = payload
+        .iter()
+        .map(|s| market::structs::instrument::Instrument::from_str(s))
+        .filter(|v| v.is_ok())
+        .map(|v| v.unwrap())
+        .collect();
+    let sender = std::sync::Arc::make_mut(&mut sender);
+    market::data::controller::work(sender.clone(), state, insts).await;
 }

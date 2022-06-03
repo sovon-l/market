@@ -1,4 +1,3 @@
-
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 pub struct Instrument {
     pub exchange: proper_market_api::Exchange,
@@ -89,9 +88,12 @@ pub fn encode_instrument<'a, T: proper_market_api::Writer<'a> + std::default::De
     instrument_e.quote(quote);
     instrument_e.base(base);
     match instrument_type {
-        InstrumentType::Spot => instrument_e.instrument_type(proper_market_api::instrument_type::InstrumentType::spot),
+        InstrumentType::Spot => {
+            instrument_e.instrument_type(proper_market_api::instrument_type::InstrumentType::spot)
+        }
         InstrumentType::Future(expiry) => {
-            instrument_e.instrument_type(proper_market_api::instrument_type::InstrumentType::future);
+            instrument_e
+                .instrument_type(proper_market_api::instrument_type::InstrumentType::future);
             if let Some(expiry) = expiry {
                 instrument_e.expiry(expiry);
             }

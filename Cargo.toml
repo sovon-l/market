@@ -8,6 +8,7 @@ edition = "2021"
 [dev-dependencies]
 hyper = { version = "0.14", features = ["full"] }
 simple_logger = { version = "2.1", features = ["timestamps"] }
+axum = "0.5"
 
 [dependencies]
 bus = "2.2.3"
