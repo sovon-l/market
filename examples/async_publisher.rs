@@ -98,6 +98,7 @@ async fn monitor_instances(
     mut sender: std::sync::Arc<crossbeam_channel::Sender<market::message::Message>>,
 ) {
     use std::str::FromStr;
+    log::info!("{}", serde_json::json!({"recv":payload}).to_string());
     let insts: Vec<market::structs::instrument::Instrument> = payload
         .iter()
         .map(|s| market::structs::instrument::Instrument::from_str(s))
