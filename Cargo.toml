@@ -27,4 +27,4 @@ futures-util = "0.3"
 futures = "0.3"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-messenger = { git = "ssh://git@github.com/proper-fin/messenger", package = "messenger" }
+messenger = { git = "ssh://git@github.com/sovon-l/messenger", package = "messenger" }
