@@ -29,7 +29,7 @@ fn main() {
         let socket = ctx.socket(zmq::PUB).unwrap();
         socket.bind(&MARKET_PUBLISHER_PUBLISH_ADDRESS).unwrap();
 
-        messenger::publisher::publisher_loop(receiver, socket);
+        messenger::pubsub::publisher_loop(receiver, socket);
     });
 
     let runtime = match tokio::runtime::Builder::new_multi_thread()
