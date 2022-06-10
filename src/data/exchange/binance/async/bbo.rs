@@ -27,8 +27,8 @@ impl crate::util::websocket::WssState for State {
 }
 
 pub fn wss(
-    sender: crossbeam_channel::Sender<crate::message::Message>,
-) -> impl Fn(
+    mut sender: impl messenger::traits::ChannelSender<crate::message::Message>,
+) -> impl FnMut(
     std::time::SystemTime,
     &mut State,
     tokio_tungstenite::tungstenite::Message,
