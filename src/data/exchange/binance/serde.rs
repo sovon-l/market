@@ -7,7 +7,7 @@ const BASE_CURRENCIES: [&str; 1] = ["USDT"];
 pub fn de_inst(s: &str) -> Option<crate::structs::instrument::Instrument> {
     let (base, quote) = crate::util::symbol::split_currency_quote(s, &BASE_CURRENCIES)?;
     Some(crate::structs::instrument::Instrument {
-        exchange: proper_market_api::Exchange::binance,
+        exchange: crate::structs::exchange::Exchange::Binance,
         base: de_ccy(base),
         quote: de_ccy(quote),
         instrument_type: crate::structs::instrument::InstrumentType::Spot,

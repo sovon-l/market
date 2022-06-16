@@ -1,6 +1,6 @@
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 pub struct Instrument {
-    pub exchange: proper_market_api::Exchange,
+    pub exchange: crate::structs::exchange::Exchange,
     pub base: [u8; 6],
     pub quote: [u8; 6],
     pub instrument_type: InstrumentType,
@@ -17,11 +17,7 @@ impl std::fmt::Display for Instrument {
         write!(
             f,
             "{}:{}_{}-{}",
-            match self.exchange {
-                proper_market_api::Exchange::binance => "binance",
-                proper_market_api::Exchange::ftx => "ftx",
-                _ => panic!(),
-            },
+            self.exchange,
             std::str::from_utf8(&self.base).unwrap(),
             std::str::from_utf8(&self.quote).unwrap(),
             match self.instrument_type {
@@ -49,7 +45,7 @@ impl std::str::FromStr for Instrument {
             return Err(());
         }
         Ok(Instrument {
-            exchange: crate::structs::exchange::from_str(splits[0]).map_err(|_| ())?,
+            exchange: crate::structs::exchange::Exchange::from_str(splits[0]).map_err(|_| ())?,
             base: crate::util::symbol::str_to_asset(parts[0]),
             quote: crate::util::symbol::str_to_asset(parts[1]),
             instrument_type: if tokens.len() < 2 {
@@ -84,7 +80,7 @@ pub fn encode_instrument<'a, T: proper_market_api::Writer<'a> + std::default::De
         base,
         instrument_type,
     } = s;
-    instrument_e.exchange(exchange);
+    instrument_e.exchange(exchange.into());
     instrument_e.quote(quote);
     instrument_e.base(base);
     match instrument_type {
@@ -105,7 +101,7 @@ pub fn decode_instrument<'a, T: proper_market_api::Reader<'a> + std::default::De
     instrument_d: &mut proper_market_api::InstrumentDecoder<T>,
 ) -> Instrument {
     Instrument {
-        exchange: instrument_d.exchange(),
+        exchange: instrument_d.exchange().into(),
         quote: instrument_d.quote(),
         base: instrument_d.base(),
         instrument_type: match instrument_d.instrument_type() {

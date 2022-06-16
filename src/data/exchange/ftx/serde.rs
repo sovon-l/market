@@ -12,21 +12,21 @@ pub fn de_inst(s: &str) -> Option<crate::structs::instrument::Instrument> {
         let (base, quote) = (v[0], v[1]);
         if quote == "PERP" {
             Some(crate::structs::instrument::Instrument {
-                exchange: proper_market_api::Exchange::ftx,
+                exchange: crate::structs::exchange::Exchange::Ftx,
                 base: de_ccy(base),
                 quote: de_ccy("usd"),
                 instrument_type: crate::structs::instrument::InstrumentType::Future(None),
             })
         } else if quote.chars().next().unwrap().is_digit(10) {
             Some(crate::structs::instrument::Instrument {
-                exchange: proper_market_api::Exchange::ftx,
+                exchange: crate::structs::exchange::Exchange::Ftx,
                 base: de_ccy(base),
                 quote: de_ccy("usd"),
                 instrument_type: crate::structs::instrument::InstrumentType::Future(Some(0)), // TODO: mmdd to unix epoch
             })
         } else {
             Some(crate::structs::instrument::Instrument {
-                exchange: proper_market_api::Exchange::ftx,
+                exchange: crate::structs::exchange::Exchange::Ftx,
                 base: de_ccy(base),
                 quote: de_ccy(quote),
                 instrument_type: crate::structs::instrument::InstrumentType::Future(None),
@@ -40,7 +40,7 @@ pub fn de_inst(s: &str) -> Option<crate::structs::instrument::Instrument> {
         let (base, quote) = (v[0], v[1]);
 
         Some(crate::structs::instrument::Instrument {
-            exchange: proper_market_api::Exchange::ftx,
+            exchange: crate::structs::exchange::Exchange::Ftx,
             base: de_ccy(base),
             quote: de_ccy(quote),
             instrument_type: crate::structs::instrument::InstrumentType::Spot,

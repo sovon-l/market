@@ -1,7 +1,7 @@
 #[derive(Default)]
 pub struct State {
     handles: std::collections::HashMap<
-        proper_market_api::Exchange,
+        crate::structs::exchange::Exchange,
         (
             std::collections::HashSet<crate::structs::instrument::Instrument>,
             Vec<tokio::task::JoinHandle<()>>,
@@ -46,7 +46,7 @@ pub async fn work(
         state,
         insts,
         sender,
-        proper_market_api::Exchange::binance,
+        crate::structs::exchange::Exchange::Binance,
         crate::data::exchange::binance::r#async::run
     );
 
@@ -54,9 +54,9 @@ pub async fn work(
         state,
         insts,
         sender,
-        proper_market_api::Exchange::ftx,
+        crate::structs::exchange::Exchange::Ftx,
         crate::data::exchange::ftx::r#async::run
     );
 
-    // crate::ftx::run(sender.clone(), insts.iter().filter(|i| i.exchange == proper_market_api::Exchange::ftx).map(|s| *s).collect());
+    // crate::ftx::run(sender.clone(), insts.iter().filter(|i| i.exchange == crate::structs::exchange::Exchange::ftx).map(|s| *s).collect());
 }
