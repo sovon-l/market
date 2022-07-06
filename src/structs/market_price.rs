@@ -13,8 +13,8 @@ impl From<MarketPrice> for zmq::Message {
     fn from(s: MarketPrice) -> zmq::Message {
         let mut buffer = vec![
             0u8;
-            proper_market_api::bbo_msg_codec::SBE_BLOCK_LENGTH as usize
-                + proper_market_api::message_header_codec::ENCODED_LENGTH
+            proper_ma_api::bbo_msg_codec::SBE_BLOCK_LENGTH as usize
+                + proper_ma_api::message_header_codec::ENCODED_LENGTH
         ];
         encode_market_price(&mut buffer, s);
         zmq::Message::from(buffer)
@@ -32,10 +32,10 @@ pub fn encode_market_price(buffer: &mut [u8], mp: MarketPrice) {
         ask_size,
     } = mp;
 
-    let mut bbo_msg = proper_market_api::BboMsgEncoder::default();
+    let mut bbo_msg = proper_ma_api::BboMsgEncoder::default();
     bbo_msg = bbo_msg.wrap(
-        proper_market_api::WriteBuf::new(buffer),
-        proper_market_api::message_header_codec::ENCODED_LENGTH,
+        proper_ma_api::WriteBuf::new(buffer),
+        proper_ma_api::message_header_codec::ENCODED_LENGTH,
     );
     bbo_msg = bbo_msg.header(0).parent().unwrap();
     let mut symbol_e = bbo_msg.instrument_encoder();
@@ -68,14 +68,14 @@ pub fn encode_market_price(buffer: &mut [u8], mp: MarketPrice) {
     ask_size_e.exponent(ask_size.scale() as i8);
     // bbo_msg = ask_size_e.parent().unwrap();
 
-    // let length = bbo_msg.encoded_length() + proper_market_api::message_header_codec::ENCODED_LENGTH;
+    // let length = bbo_msg.encoded_length() + proper_ma_api::message_header_codec::ENCODED_LENGTH;
     // buffer.iter().take(length).map(|b| *b).collect()
 }
 
 pub fn decode_market_price(v: &[u8]) -> MarketPrice {
-    let mut bbo_msg_d = proper_market_api::BboMsgDecoder::default();
-    let buf = proper_market_api::ReadBuf::new(v);
-    let header = proper_market_api::MessageHeaderDecoder::default().wrap(buf, 0);
+    let mut bbo_msg_d = proper_ma_api::BboMsgDecoder::default();
+    let buf = proper_ma_api::ReadBuf::new(v);
+    let header = proper_ma_api::MessageHeaderDecoder::default().wrap(buf, 0);
     bbo_msg_d = bbo_msg_d.header(header);
 
     let mut symbol_d = bbo_msg_d.instrument_decoder();

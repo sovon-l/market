@@ -110,18 +110,26 @@ pub fn wss(
                 return None;
             };
             sender
-                .send(crate::message::Message::BboMsg(
-                    crate::structs::market_price::MarketPrice {
+                .send(crate::message::Message::QuotesMsg(
+                    crate::structs::quotes::Quotes {
                         symbol,
                         market_timestamp: time_recv
                             .duration_since(std::time::UNIX_EPOCH)
                             .unwrap()
                             .as_nanos() as u64,
                         timestamp: Some((time * 1_000_000_000.0) as u64),
-                        bid_price: bid,
-                        bid_size: bidSize,
-                        ask_price: ask,
-                        ask_size: askSize,
+                        is_snapshot: true,
+                        is_l1: true,
+                        depths: vec![
+                            crate::structs::quotes::Depth {
+                                price: bid,
+                                size: bidSize,
+                            },
+                            crate::structs::quotes::Depth {
+                                price: ask,
+                                size: askSize,
+                            },
+                        ],
                     },
                 ))
                 .unwrap();

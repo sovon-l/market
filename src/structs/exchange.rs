@@ -5,21 +5,21 @@ pub enum Exchange {
     Ftx,
 }
 
-impl std::convert::From<proper_market_api::Exchange> for Exchange {
-    fn from(exchange: proper_market_api::Exchange) -> Self {
+impl std::convert::From<proper_ma_api::Exchange> for Exchange {
+    fn from(exchange: proper_ma_api::Exchange) -> Self {
         match exchange {
-            proper_market_api::Exchange::binance => Self::Binance,
-            proper_market_api::Exchange::ftx => Self::Ftx,
+            proper_ma_api::Exchange::binance => Self::Binance,
+            proper_ma_api::Exchange::ftx => Self::Ftx,
             _ => unimplemented!(),
         }
     }
 }
 
-impl std::convert::Into<proper_market_api::Exchange> for Exchange {
-    fn into(self) -> proper_market_api::Exchange {
+impl std::convert::Into<proper_ma_api::Exchange> for Exchange {
+    fn into(self) -> proper_ma_api::Exchange {
         match self {
-            Self::Binance => proper_market_api::Exchange::binance,
-            Self::Ftx => proper_market_api::Exchange::ftx,
+            Self::Binance => proper_ma_api::Exchange::binance,
+            Self::Ftx => proper_ma_api::Exchange::ftx,
         }
     }
 }
