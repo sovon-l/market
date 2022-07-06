@@ -19,9 +19,9 @@ impl From<Quotes> for zmq::Message {
         let mut buffer = vec![
             0u8;
             proper_ma_api::message_header_codec::ENCODED_LENGTH
-                + proper_ma_api::orderbook_msg_codec::SBE_BLOCK_LENGTH as usize
-                + proper_ma_api::orderbook_msg_codec::DepthsEncoder::<
-                    proper_ma_api::orderbook_msg_codec::OrderbookMsgEncoder,
+                + proper_ma_api::quote_msg_codec::SBE_BLOCK_LENGTH as usize
+                + proper_ma_api::quote_msg_codec::DepthsEncoder::<
+                    proper_ma_api::quote_msg_codec::QuoteMsgEncoder,
                 >::block_length() as usize
                     * s.depths.len()
                 + 3
@@ -41,7 +41,7 @@ pub fn encode_quotes(buffer: &mut [u8], q: Quotes) {
         depths,
     } = q;
 
-    let mut quotes_msg = proper_ma_api::OrderbookMsgEncoder::default();
+    let mut quotes_msg = proper_ma_api::QuoteMsgEncoder::default();
     quotes_msg = quotes_msg.wrap(
         proper_ma_api::WriteBuf::new(buffer),
         proper_ma_api::message_header_codec::ENCODED_LENGTH,
@@ -80,7 +80,7 @@ pub fn encode_quotes(buffer: &mut [u8], q: Quotes) {
 }
 
 pub fn decode_quotes(v: &[u8]) -> Quotes {
-    let mut quotes_msg_d = proper_ma_api::OrderbookMsgDecoder::default();
+    let mut quotes_msg_d = proper_ma_api::QuoteMsgDecoder::default();
     let buf = proper_ma_api::ReadBuf::new(v);
     let header = proper_ma_api::MessageHeaderDecoder::default().wrap(buf, 0);
     quotes_msg_d = quotes_msg_d.header(header);
