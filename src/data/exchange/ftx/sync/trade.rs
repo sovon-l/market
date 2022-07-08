@@ -21,7 +21,7 @@ struct Trade {
 }
 
 pub struct State {
-    pub insts: Vec<crate::structs::instrument::Instrument>,
+    pub insts: Vec<proper_ma_structs::structs::market::instrument::Instrument>,
 }
 
 impl crate::util::websocket::WssState for State {
@@ -72,9 +72,9 @@ pub fn wss(
                 log::error!("error parsing symbol: {}", market);
                 return;
             };
-            let mut trades: Vec<crate::structs::trades::Trade> = data
+            let mut trades: Vec<proper_ma_structs::structs::market::trades::Trade> = data
                 .into_iter()
-                .map(|t| crate::structs::trades::Trade {
+                .map(|t| proper_ma_structs::structs::market::trades::Trade {
                     price: t.price,
                     size: {
                         let mut rt = t.size;
@@ -93,7 +93,7 @@ pub fn wss(
 
             sender
                 .send(crate::message::Message::TradesMsg(
-                    crate::structs::trades::Trades {
+                    proper_ma_structs::structs::market::trades::Trades {
                         symbol,
                         market_timestamp: time_recv
                             .duration_since(std::time::UNIX_EPOCH)

@@ -3,7 +3,7 @@ pub mod trade;
 
 pub fn run(
     sender: impl messenger::traits::ChannelSender<crate::message::Message> + Clone + Send + 'static,
-    instruments: &std::collections::HashSet<crate::structs::instrument::Instrument>,
+    instruments: &std::collections::HashSet<proper_ma_structs::structs::market::instrument::Instrument>,
 ) -> Vec<futures::future::BoxFuture<'static, ()>> {
     let mut rt = Vec::<futures::future::BoxFuture<'static, ()>>::new();
 

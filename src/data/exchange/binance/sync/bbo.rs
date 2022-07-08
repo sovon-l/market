@@ -73,7 +73,7 @@ pub fn wss(
         };
         sender
             .send(crate::message::Message::QuotesMsg(
-                crate::structs::quotes::Quotes {
+                proper_ma_structs::structs::market::quotes::Quotes {
                     symbol,
                     market_timestamp: time_recv
                         .duration_since(std::time::UNIX_EPOCH)
@@ -83,11 +83,11 @@ pub fn wss(
                     is_snapshot: true,
                     is_l1: true,
                     depths: vec![
-                        crate::structs::quotes::Depth {
+                        proper_ma_structs::structs::market::quotes::Depth {
                             price: b,
                             size: -B,
                         },
-                        crate::structs::quotes::Depth {
+                        proper_ma_structs::structs::market::quotes::Depth {
                             price: a,
                             size: A,
                         },

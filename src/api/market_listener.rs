@@ -14,6 +14,6 @@ impl<S: MarketListenerTrait> messenger::pubsub::Listener<crate::message::Message
 }
 
 pub trait MarketListenerTrait {
-    fn on_quotes(&mut self, msg: crate::structs::quotes::Quotes);
-    fn on_trades(&mut self, msg: crate::structs::trades::Trades);
+    fn on_quotes(&mut self, msg: proper_ma_structs::structs::market::quotes::Quotes);
+    fn on_trades(&mut self, msg: proper_ma_structs::structs::market::trades::Trades);
 }

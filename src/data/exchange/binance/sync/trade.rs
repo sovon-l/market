@@ -93,13 +93,13 @@ pub fn wss(
         state.last_ts = Some((T, new_n));
         sender
             .send(crate::message::Message::TradesMsg(
-                crate::structs::trades::Trades {
+                proper_ma_structs::structs::market::trades::Trades {
                     symbol,
                     market_timestamp: time_recv
                         .duration_since(std::time::UNIX_EPOCH)
                         .unwrap()
                         .as_nanos() as u64,
-                    trades: vec![crate::structs::trades::Trade {
+                    trades: vec![proper_ma_structs::structs::market::trades::Trade {
                         price: p,
                         size: q,
                         timestamp: T * 1_000_000 + new_n,

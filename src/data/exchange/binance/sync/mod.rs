@@ -1,7 +1,7 @@
 pub mod bbo;
 pub mod trade;
 
-fn get_spot_bbo_links(i: &[&crate::structs::instrument::Instrument]) -> Vec<String> {
+fn get_spot_bbo_links(i: &[&proper_ma_structs::structs::market::instrument::Instrument]) -> Vec<String> {
     vec![format!(
         "{}/stream?streams={}",
         *crate::env_var::MARKET_BINANCE_SPOT_WSS,
@@ -15,7 +15,7 @@ fn get_spot_bbo_links(i: &[&crate::structs::instrument::Instrument]) -> Vec<Stri
     )]
 }
 
-fn get_spot_trade_links(i: &[&crate::structs::instrument::Instrument]) -> Vec<String> {
+fn get_spot_trade_links(i: &[&proper_ma_structs::structs::market::instrument::Instrument]) -> Vec<String> {
     vec![format!(
         "{}/stream?streams={}",
         *crate::env_var::MARKET_BINANCE_SPOT_WSS,
@@ -31,11 +31,11 @@ fn get_spot_trade_links(i: &[&crate::structs::instrument::Instrument]) -> Vec<St
 
 pub fn run(
     sender: crossbeam_channel::Sender<crate::message::Message>,
-    instruments: Vec<crate::structs::instrument::Instrument>,
+    instruments: Vec<proper_ma_structs::structs::market::instrument::Instrument>,
 ) {
-    let spot_instruments: Vec<&crate::structs::instrument::Instrument> = instruments
+    let spot_instruments: Vec<&proper_ma_structs::structs::market::instrument::Instrument> = instruments
         .iter()
-        .filter(|i| i.instrument_type == crate::structs::instrument::InstrumentType::Spot)
+        .filter(|i| i.instrument_type == proper_ma_structs::structs::market::instrument::InstrumentType::Spot)
         .collect();
     for bbo_url in get_spot_bbo_links(&spot_instruments) {
         let sender_clone = sender.clone();

@@ -1,9 +1,9 @@
 #[derive(Default)]
 pub struct State {
     handles: std::collections::HashMap<
-        crate::structs::exchange::Exchange,
+        proper_ma_structs::structs::market::exchange::Exchange,
         (
-            std::collections::HashSet<crate::structs::instrument::Instrument>,
+            std::collections::HashSet<proper_ma_structs::structs::market::instrument::Instrument>,
             Vec<tokio::task::JoinHandle<()>>,
         ),
     >,
@@ -38,7 +38,7 @@ macro_rules! handle_exchange_state {
 pub async fn work(
     sender: crossbeam_channel::Sender<crate::message::Message>,
     state: std::sync::Arc<tokio::sync::Mutex<State>>,
-    insts: Vec<crate::structs::instrument::Instrument>,
+    insts: Vec<proper_ma_structs::structs::market::instrument::Instrument>,
 ) {
     let mut state = state.lock().await;
 
@@ -46,7 +46,7 @@ pub async fn work(
         state,
         insts,
         sender,
-        crate::structs::exchange::Exchange::Binance,
+        proper_ma_structs::structs::market::exchange::Exchange::Binance,
         crate::data::exchange::binance::r#async::run
     );
 
@@ -54,9 +54,9 @@ pub async fn work(
         state,
         insts,
         sender,
-        crate::structs::exchange::Exchange::Ftx,
+        proper_ma_structs::structs::market::exchange::Exchange::Ftx,
         crate::data::exchange::ftx::r#async::run
     );
 
-    // crate::ftx::run(sender.clone(), insts.iter().filter(|i| i.exchange == crate::structs::exchange::Exchange::ftx).map(|s| *s).collect());
+    // crate::ftx::run(sender.clone(), insts.iter().filter(|i| i.exchange == proper_ma_structs::structs::market::exchange::Exchange::ftx).map(|s| *s).collect());
 }
