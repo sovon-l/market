@@ -35,9 +35,8 @@ macro_rules! handle_exchange_state {
     };
 }
 
-// TODO: sender use impl Sink
 pub async fn work(
-    sender: crossbeam_channel::Sender<crate::message::Message>,
+    sender: impl messenger::traits::ChannelSender<crate::message::Message> + Clone + Send + 'static,
     state: std::sync::Arc<tokio::sync::Mutex<State>>,
     insts: Vec<proper_ma_structs::structs::market::instrument::Instrument>,
 ) {
