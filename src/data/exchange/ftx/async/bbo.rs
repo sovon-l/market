@@ -42,9 +42,13 @@ pub fn wss(
 ) -> impl FnMut(
     std::time::SystemTime,
     &mut State,
-    tokio_tungstenite::tungstenite::Message,
+    crate::util::websocket::Message<()>,
 ) -> Option<tokio_tungstenite::tungstenite::Message> {
     move |time_recv, _, msg| {
+        let msg = match msg {
+            crate::util::websocket::Message::Control(_) => return None,
+            crate::util::websocket::Message::WssMessage(msg) => msg,
+        };
         let msg: WssMessage = match msg {
             tokio_tungstenite::tungstenite::Message::Text(mut s) => {
                 log::debug!(

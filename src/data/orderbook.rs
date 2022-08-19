@@ -43,7 +43,7 @@ impl<VUpdate, VStatus: VerificationStatus<VerificationUpdate=VUpdate>> MbpFullbo
                 return Err(crate::util::orderbook::error::OrderbookError::InvalidUpdate);
             }
         }
-        Ok(())  
+        Ok(())
     }
 }
 

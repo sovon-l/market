@@ -71,13 +71,19 @@ pub fn work<T: WssState>(
     }
 }
 
+pub enum Message<C> {
+    Control(C),
+    WssMessage(tokio_tungstenite::tungstenite::Message),
+}
+
 // TODO: should use annotation similar as above but async fn
-pub async fn awork<T: WssState>(
+pub async fn awork<C, T: WssState>(
     address: String,
+    mut control_pipe: impl futures::stream::Stream<Item=C> + std::marker::Unpin + futures_util::stream::FusedStream,
     mut action: impl FnMut(
         std::time::SystemTime,
         &mut T,
-        tokio_tungstenite::tungstenite::Message,
+        Message<C>,
     ) -> Option<tokio_tungstenite::tungstenite::Message>,
     mut state: T,
 ) {
@@ -121,24 +127,68 @@ pub async fn awork<T: WssState>(
         for msg in state.init_messages().into_iter() {
             wss.send(msg).await.unwrap();
         }
+        
+        let mut wss = wss.fuse();
 
-        while let Some(msg) = wss.next().await {
-            if let Ok(msg) = msg {
-                let time = std::time::SystemTime::now();
-                if let Some(msg) = action(time, &mut state, msg) {
-                    wss.send(msg).await.unwrap();
-                };
-                let time_used = std::time::SystemTime::now().duration_since(time).unwrap();
-                if time_used > std::time::Duration::from_secs(1) {
-                    log::warn!(
-                        "{}",
-                        serde_json::json!({
-                            "msg": "message action slow",
-                            "time_used_us": time_used.as_micros(),
-                        })
-                        .to_string()
-                    );
-                }
+        loop {
+            let msg = futures::select! {
+                wss_msg = wss.next() => {
+                    match wss_msg {
+                        Some(Ok(msg)) => Message::WssMessage(msg),
+                        Some(Err(e)) => {
+                            log::error!(
+                                "{}",
+                                serde_json::json!({
+                                    "msg": "fail to read wss message",
+                                    "error": e.to_string(),
+                                })
+                                .to_string()
+                            );
+                            break;
+                        }
+                        None => {
+                            log::error!(
+                                "{}",
+                                serde_json::json!({
+                                    "msg": "wss closed",
+                                })
+                                .to_string()
+                            );
+                            break;
+                        }
+                    }
+                },
+                control_msg = control_pipe.next() => {
+                    match control_msg {
+                        Some(msg) => Message::Control(msg),
+                        None => {
+                            log::error!(
+                                "{}",
+                                serde_json::json!({
+                                    "msg": "control pipe closed",
+                                })
+                                .to_string()
+                            );
+                            break;
+                        }
+                    }
+                },
+            };
+
+            let time = std::time::SystemTime::now();
+            if let Some(msg) = action(time, &mut state, msg) {
+                wss.send(msg).await.unwrap();
+            };
+            let time_used = std::time::SystemTime::now().duration_since(time).unwrap();
+            if time_used > std::time::Duration::from_secs(1) {
+                log::warn!(
+                    "{}",
+                    serde_json::json!({
+                        "msg": "message action slow",
+                        "time_used_us": time_used.as_micros(),
+                    })
+                    .to_string()
+                );
             }
         }
     }
