@@ -12,15 +12,22 @@ struct WssMessage {
 struct WssData {
     e: String,
     E: u64,
-    s: String,
     t: u64,
-    p: rust_decimal::Decimal,
-    q: rust_decimal::Decimal,
     b: u64,
-    a: u64,
-    T: u64,
-    m: bool,
     M: bool,
+    #[serde(rename = "s")]
+    symbol: String,
+    #[serde(rename = "T")]
+    trade_ts: u64,
+    #[serde(rename = "a")]
+    id: u64,
+    #[serde(rename = "p")]
+    price: rust_decimal::Decimal,
+    #[serde(rename = "q")]
+    quantity: rust_decimal::Decimal,
+    #[serde(rename = "m")]
+    buyer_is_maker: bool,
+
 }
 
 #[derive(Default)]
@@ -89,9 +96,9 @@ pub fn wss(
         };
         let WssMessage { data, .. } = msg;
         let WssData {
-            T, s, p, mut q, m, ..
+            trade_ts, symbol, price, mut quantity, buyer_is_maker, ..
         } = data;
-        let symbol = if let Some(s) = crate::data::exchange::binance::serde::de_inst(&s) {
+        let symbol = if let Some(s) = crate::data::exchange::binance::serde::de_inst(&symbol) {
             s
         } else {
             log::error!(
@@ -99,15 +106,15 @@ pub fn wss(
                 serde_json::json!({
                     "err": {
                         "msg": "error parsing symbol",
-                        "rt": s,
+                        "rt": symbol,
                     }
                 })
             );
             return None;
         };
-        q.set_sign_positive(!m);
+        quantity.set_sign_positive(!buyer_is_maker);
         let new_n = if let Some((last_ts, n)) = state.last_ts.as_ref() {
-            if *last_ts == T {
+            if *last_ts == trade_ts {
                 n + 1
             } else {
                 0
@@ -115,7 +122,7 @@ pub fn wss(
         } else {
             0
         };
-        state.last_ts = Some((T, new_n));
+        state.last_ts = Some((trade_ts, new_n));
         sender
             .send(crate::message::Message::TradesMsg(
                 proper_ma_structs::structs::market::trades::Trades {
@@ -125,9 +132,9 @@ pub fn wss(
                         .unwrap()
                         .as_nanos() as u64,
                     trades: vec![proper_ma_structs::structs::market::trades::Trade {
-                        price: p,
-                        size: q,
-                        timestamp: T * 1_000_000 + new_n,
+                        price: price,
+                        size: quantity,
+                        timestamp: trade_ts * 1_000_000 + new_n,
                     }],
                 },
             ))
