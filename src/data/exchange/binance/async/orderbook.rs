@@ -68,7 +68,7 @@ type MbpFullbook = crate::data::orderbook::MbpFullbook<FullbookSeqNum>;
 
 pub enum MbpCache {
     BuiltBook(MbpFullbook),
-    BuildingBook(Vec<MbpUpdate>),
+    BuildingBook(ringbuffer::AllocRingBuffer<MbpUpdate>),
 }
 impl crate::data::mbp_handler::MbpCache<UpdateSeqNum, FullbookSeqNum> for MbpCache {
     fn is_book_built(&self) -> bool {
@@ -81,12 +81,16 @@ impl crate::data::mbp_handler::MbpCache<UpdateSeqNum, FullbookSeqNum> for MbpCac
         MbpCache::BuiltBook(book)
     }
     fn new_update(update: MbpUpdate) -> Self {
-        MbpCache::BuildingBook(vec![update])
+        use ringbuffer::RingBufferWrite;
+        let mut rt = ringbuffer::AllocRingBuffer::with_capacity(1024);
+        rt.push(update);
+        MbpCache::BuildingBook(rt)
     }
     fn process_response(
         &self,
         book: MbpFullbook,
     ) -> Result<Option<Self>, Box<dyn std::error::Error>> {
+        use ringbuffer::RingBufferExt;
         match self {
             MbpCache::BuiltBook(b) => {
                 if book.verification_status.seq_num > b.verification_status.seq_num {
@@ -99,8 +103,8 @@ impl crate::data::mbp_handler::MbpCache<UpdateSeqNum, FullbookSeqNum> for MbpCac
             }
             MbpCache::BuildingBook(updates) => {
                 let book_seq_num = book.verification_status.seq_num;
-                let update_first_prev_seq_num = &updates[0].verification_update.first;
-                let update_last_seq_num = &updates[updates.len() - 1].verification_update.last;
+                let update_first_prev_seq_num = &updates.peek().unwrap().verification_update.first;
+                let update_last_seq_num = &updates.get(-1).unwrap().verification_update.last;
 
                 if book_seq_num < *update_first_prev_seq_num {
                     log::debug!("seq num too small, discarding");
@@ -112,13 +116,13 @@ impl crate::data::mbp_handler::MbpCache<UpdateSeqNum, FullbookSeqNum> for MbpCac
                 }
                 let mut mbp_book = Self::BuiltBook(book);
                 let mut found = false;
-                for update in updates {
+                for update in updates.iter() {
                     if let Self::BuiltBook(mbp_book) = &mbp_book {
                         let update_prev_seq_num = update.verification_update.first;
                         let update_seq_num = update.verification_update.last;
                         let book_seq_num = mbp_book.verification_status.seq_num;
 
-                        if update_prev_seq_num <= book_seq_num && book_seq_num < update_seq_num {
+                        if update_prev_seq_num <= book_seq_num && book_seq_num <= update_seq_num {
                             found = true;
                         }
                     }
@@ -137,12 +141,9 @@ impl crate::data::mbp_handler::MbpCache<UpdateSeqNum, FullbookSeqNum> for MbpCac
     fn process_update(&mut self, update: MbpUpdate) -> Result<(), Box<dyn std::error::Error>> {
         match self {
             MbpCache::BuildingBook(u) => {
-                if u.len() > 1000 {
-                    Err("accumulated updates without refresh".into())
-                } else {
-                    u.push(update);
-                    Ok(())
-                }
+                use ringbuffer::RingBufferWrite;
+                u.push(update);
+                Ok(())
             }
             MbpCache::BuiltBook(b) => {
                 let update_prev_seq_num = update.verification_update.first;
@@ -200,7 +201,10 @@ pub fn wss(
 ) -> Option<tokio_tungstenite::tungstenite::Message> {
     move |time_recv, state, msg| {
         let msg = match msg {
-            crate::util::websocket::Message::Control(_) => return None,
+            crate::util::websocket::Message::Control(_) => {
+                // TODO: if control recv orderbook snapshot send refresh
+                return None;
+            },
             crate::util::websocket::Message::WssMessage(msg) => msg,
         };
         let msg: WssMessage = match msg {
@@ -246,7 +250,30 @@ pub fn wss(
         };
         let WssMessage { data, .. } = msg;
         let WssData { E, s, U, u, b, a } = data;
+        
+        let symbol = if let Some(s) = crate::data::exchange::binance::serde::de_inst(&s) {
+            s
+        } else {
+            log::error!(
+                "{}",
+                serde_json::json!({
+                    "err": {
+                        "msg": "error parsing symbol",
+                        "rt": s,
+                    }
+                })
+            );
+            return None;
+        };
 
+        // let orderbook_update = proper_ma_structs::structs::market::quotes::Quotes {
+        //     symbol,
+        //     market_timestamp: time_recv.duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as u64,
+        //     timestamp: None,
+        //     is_snapshot: false,
+        //     is_l1: false,
+        //     depths: 
+        // }
         // bid < midprice, +ve quantity
         // ask > midprice, -ve quantity
         None

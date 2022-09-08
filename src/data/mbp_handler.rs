@@ -16,8 +16,8 @@ pub trait MbpCache<VU, VS: VerificationStatus<VerificationUpdate = VU>>: Send + 
     fn process_update(&mut self, update: MbpUpdate<VU>) -> Result<(), Box<dyn Error>>;
 }
 
-pub trait MbpHandler<VU, VS: VerificationStatus<VerificationUpdate = VU>, T: MbpCache<VU, VS>>:
-    Send + Sync
-{
-    // fn request_for_snapshot(&self, inst: &Instrument) -> Result<(), Box<dyn Error>>;
-}
+// pub trait MbpHandler<VU, VS: VerificationStatus<VerificationUpdate = VU>, T: MbpCache<VU, VS>>:
+//     Send + Sync
+// {
+//     // fn request_for_snapshot(&self, inst: &Instrument) -> Result<(), Box<dyn Error>>;
+// }
