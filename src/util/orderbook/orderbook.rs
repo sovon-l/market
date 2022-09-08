@@ -1,8 +1,10 @@
-
 pub trait Orderbook {
     fn get_mut_book(&mut self) -> &mut Vec<crate::util::orderbook::depth::MbpDepth>;
-    
-    fn update_book(&mut self, updates: &[crate::util::orderbook::depth::MbpDepth]) -> Result<(), crate::util::orderbook::error::OrderbookError> {
+
+    fn update_book(
+        &mut self,
+        updates: &[crate::util::orderbook::depth::MbpDepth],
+    ) -> Result<(), crate::util::orderbook::error::OrderbookError> {
         let mut delete_nonexist_depth = false;
         for depth in updates {
             let self_book = self.get_mut_book();
@@ -19,7 +21,10 @@ pub trait Orderbook {
     }
 }
 
-fn update_page(page: &mut Vec<crate::util::orderbook::depth::MbpDepth>, depth: crate::util::orderbook::depth::MbpDepth) -> Result<(), crate::util::orderbook::error::OrderbookError> {
+fn update_page(
+    page: &mut Vec<crate::util::orderbook::depth::MbpDepth>,
+    depth: crate::util::orderbook::depth::MbpDepth,
+) -> Result<(), crate::util::orderbook::error::OrderbookError> {
     match page.binary_search(&depth) {
         Ok(i) => {
             if depth.size.is_zero() {
@@ -31,7 +36,7 @@ fn update_page(page: &mut Vec<crate::util::orderbook::depth::MbpDepth>, depth: c
         }
         Err(i) => {
             if depth.size.is_zero() {
-                return Err(crate::util::orderbook::error::OrderbookError::DeleteNonexistDepth)
+                return Err(crate::util::orderbook::error::OrderbookError::DeleteNonexistDepth);
             } else {
                 page.insert(i, depth);
             }

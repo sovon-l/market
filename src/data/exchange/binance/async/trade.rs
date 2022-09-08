@@ -27,7 +27,6 @@ struct WssData {
     quantity: rust_decimal::Decimal,
     #[serde(rename = "m")]
     buyer_is_maker: bool,
-
 }
 
 #[derive(Default)]
@@ -96,7 +95,12 @@ pub fn wss(
         };
         let WssMessage { data, .. } = msg;
         let WssData {
-            trade_ts, symbol, price, mut quantity, buyer_is_maker, ..
+            trade_ts,
+            symbol,
+            price,
+            mut quantity,
+            buyer_is_maker,
+            ..
         } = data;
         let symbol = if let Some(s) = crate::data::exchange::binance::serde::de_inst(&symbol) {
             s

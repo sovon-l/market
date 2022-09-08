@@ -10,10 +10,10 @@ struct WssMessage {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct WssData {
-    E: u64, // Event time
+    E: u64,    // Event time
     s: String, // Symbol
-    U: u64, // First update ID in event
-    u: u64, // Final update ID in event
+    U: u64,    // First update ID in event
+    u: u64,    // Final update ID in event
     // pu: Option<u64>, // Final update ID in previous event (only for binance derivatives)
     b: Vec<[rust_decimal::Decimal; 2]>, // Bids to be updated
     a: Vec<[rust_decimal::Decimal; 2]>, // Asks to be updated
@@ -21,7 +21,10 @@ struct WssData {
 
 #[derive(Default)]
 pub struct State {
-    last_ts: Option<(u64, u64)>,
+    mbpcaches: std::collections::HashMap<
+        proper_ma_structs::structs::market::instrument::Instrument,
+        MbpCache,
+    >,
 }
 
 impl crate::util::websocket::WssState for State {
@@ -45,15 +48,15 @@ pub struct FullbookSeqNum {
 impl crate::data::orderbook::VerificationStatus for FullbookSeqNum {
     type VerificationUpdate = UpdateSeqNum;
     fn verify(
-        orderbook: &[crate::util::orderbook::depth::MbpDepth], 
-        status: &mut Self, 
+        orderbook: &[crate::util::orderbook::depth::MbpDepth],
+        status: &mut Self,
         update: &mut Self::VerificationUpdate,
     ) -> Option<bool> {
         if status.seq_num < update.first + 1 {
-            return Some(false)
+            return Some(false);
         }
         if status.seq_num < update.last {
-            return None
+            return None;
         }
         status.seq_num = update.last;
         Some(true)
@@ -80,7 +83,10 @@ impl crate::data::mbp_handler::MbpCache<UpdateSeqNum, FullbookSeqNum> for MbpCac
     fn new_update(update: MbpUpdate) -> Self {
         MbpCache::BuildingBook(vec![update])
     }
-    fn process_response(&self, book: MbpFullbook) -> Result<Option<Self>, Box<dyn std::error::Error>> {
+    fn process_response(
+        &self,
+        book: MbpFullbook,
+    ) -> Result<Option<Self>, Box<dyn std::error::Error>> {
         match self {
             MbpCache::BuiltBook(b) => {
                 if book.verification_status.seq_num > b.verification_status.seq_num {
@@ -146,25 +152,36 @@ impl crate::data::mbp_handler::MbpCache<UpdateSeqNum, FullbookSeqNum> for MbpCac
                 if update_seq_num <= book_seq_num {
                     log::debug!(
                         "our {} their prev {} their new {} - discard",
-                        book_seq_num, update_prev_seq_num, update_seq_num
+                        book_seq_num,
+                        update_prev_seq_num,
+                        update_seq_num
                     );
                     Ok(())
                 } else if book_seq_num + 1 == update_prev_seq_num {
                     log::debug!(
                         "our {} their prev {} their new {} - normal",
-                        book_seq_num, update_prev_seq_num, update_seq_num
+                        book_seq_num,
+                        update_prev_seq_num,
+                        update_seq_num
                     );
                     let _ = b.update(update);
                     Ok(())
                 } else if update_prev_seq_num <= book_seq_num && book_seq_num < update_seq_num {
                     log::debug!(
                         "our {} their prev {} their new {} - catchup",
-                        book_seq_num, update_prev_seq_num, update_seq_num
+                        book_seq_num,
+                        update_prev_seq_num,
+                        update_seq_num
                     );
                     let _ = b.update(update);
                     Ok(())
                 } else {
-                    log::error!("our {} their prev {} their new {}", book_seq_num, update_prev_seq_num, update_seq_num);
+                    log::error!(
+                        "our {} their prev {} their new {}",
+                        book_seq_num,
+                        update_prev_seq_num,
+                        update_seq_num
+                    );
                     Err("seq num mismatch".into())
                 }
             }

@@ -3,10 +3,12 @@ pub mod trade;
 
 pub fn run(
     sender: impl messenger::traits::ChannelSender<crate::message::Message> + Clone + Send + 'static,
-    instruments: &std::collections::HashSet<proper_ma_structs::structs::market::instrument::Instrument>,
+    instruments: &std::collections::HashSet<
+        proper_ma_structs::structs::market::instrument::Instrument,
+    >,
 ) -> Vec<futures::future::BoxFuture<'static, ()>> {
     use futures_util::StreamExt;
-    
+
     let mut rt = Vec::<futures::future::BoxFuture<'static, ()>>::new();
 
     let sender_clone = sender.clone();

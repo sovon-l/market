@@ -7,8 +7,12 @@ pub enum Message {
 impl From<Message> for zmq::Message {
     fn from(s: Message) -> zmq::Message {
         match s {
-            Message::QuotesMsg(msg) => proper_ma_structs::sbe::market::quotes_msg::marshal_quotes_msg(msg).into(),
-            Message::TradesMsg(msg) => proper_ma_structs::sbe::market::trades_msg::marshal_trades_msg(msg).into(),
+            Message::QuotesMsg(msg) => {
+                proper_ma_structs::sbe::market::quotes_msg::marshal_quotes_msg(msg).into()
+            }
+            Message::TradesMsg(msg) => {
+                proper_ma_structs::sbe::market::trades_msg::marshal_trades_msg(msg).into()
+            }
         }
     }
 }
@@ -28,8 +32,12 @@ pub fn decode_message(v: &[u8]) -> Message {
 
     // TODO: decode should pass &[u8] without header?
     match (schema_id, version, template_id) {
-        (1, 1, 1) => Message::QuotesMsg(proper_ma_structs::sbe::market::quotes_msg::unmarshal_quotes_msg(v)),
-        (1, 1, 2) => Message::TradesMsg(proper_ma_structs::sbe::market::trades_msg::unmarshal_trades_msg(v)),
+        (1, 1, 1) => {
+            Message::QuotesMsg(proper_ma_structs::sbe::market::quotes_msg::unmarshal_quotes_msg(v))
+        }
+        (1, 1, 2) => {
+            Message::TradesMsg(proper_ma_structs::sbe::market::trades_msg::unmarshal_trades_msg(v))
+        }
         (s, v, t) => {
             unimplemented!(
                 "cannot decode msg: schema({}) version({}) template_id({}",

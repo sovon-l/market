@@ -1,4 +1,3 @@
-
 // IMPORTANT: using convention if price > midprice then size is -ve
 #[derive(Clone, Copy)]
 pub struct MbpDepth {

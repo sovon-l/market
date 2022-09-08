@@ -79,7 +79,9 @@ pub enum Message<C> {
 // TODO: should use annotation similar as above but async fn
 pub async fn awork<C, T: WssState>(
     address: String,
-    mut control_pipe: impl futures::stream::Stream<Item=C> + std::marker::Unpin + futures_util::stream::FusedStream,
+    mut control_pipe: impl futures::stream::Stream<Item = C>
+        + std::marker::Unpin
+        + futures_util::stream::FusedStream,
     mut action: impl FnMut(
         std::time::SystemTime,
         &mut T,
@@ -127,7 +129,7 @@ pub async fn awork<C, T: WssState>(
         for msg in state.init_messages().into_iter() {
             wss.send(msg).await.unwrap();
         }
-        
+
         let mut wss = wss.fuse();
 
         loop {

@@ -1,4 +1,3 @@
-
 pub mod depth;
-pub mod orderbook;
 pub mod error;
+pub mod orderbook;

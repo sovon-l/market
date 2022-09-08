@@ -107,14 +107,8 @@ pub fn wss(
                     is_snapshot: true,
                     is_l1: true,
                     depths: vec![
-                        proper_ma_structs::structs::market::quotes::Depth {
-                            price: b,
-                            size: -B,
-                        },
-                        proper_ma_structs::structs::market::quotes::Depth {
-                            price: a,
-                            size: A,
-                        },
+                        proper_ma_structs::structs::market::quotes::Depth { price: b, size: -B },
+                        proper_ma_structs::structs::market::quotes::Depth { price: a, size: A },
                     ],
                 },
             ))

@@ -1,8 +1,10 @@
 pub mod bbo;
-pub mod trade;
 pub mod orderbook;
+pub mod trade;
 
-fn get_spot_bbo_links(i: &[&proper_ma_structs::structs::market::instrument::Instrument]) -> Vec<String> {
+fn get_spot_bbo_links(
+    i: &[&proper_ma_structs::structs::market::instrument::Instrument],
+) -> Vec<String> {
     vec![format!(
         "{}/stream?streams={}",
         *crate::env_var::MARKET_BINANCE_SPOT_WSS,
@@ -16,7 +18,9 @@ fn get_spot_bbo_links(i: &[&proper_ma_structs::structs::market::instrument::Inst
     )]
 }
 
-fn get_spot_trade_links(i: &[&proper_ma_structs::structs::market::instrument::Instrument]) -> Vec<String> {
+fn get_spot_trade_links(
+    i: &[&proper_ma_structs::structs::market::instrument::Instrument],
+) -> Vec<String> {
     vec![format!(
         "{}/stream?streams={}",
         *crate::env_var::MARKET_BINANCE_SPOT_WSS,
@@ -30,7 +34,9 @@ fn get_spot_trade_links(i: &[&proper_ma_structs::structs::market::instrument::In
     )]
 }
 
-fn get_spot_orderbook_links(i: &[&proper_ma_structs::structs::market::instrument::Instrument]) -> Vec<String> {
+fn get_spot_orderbook_links(
+    i: &[&proper_ma_structs::structs::market::instrument::Instrument],
+) -> Vec<String> {
     vec![format!(
         "{}/stream?streams={}",
         *crate::env_var::MARKET_BINANCE_SPOT_WSS,
@@ -46,23 +52,29 @@ fn get_spot_orderbook_links(i: &[&proper_ma_structs::structs::market::instrument
 
 pub fn run(
     sender: impl messenger::traits::ChannelSender<crate::message::Message> + Clone + Send + 'static,
-    instruments: &std::collections::HashSet<proper_ma_structs::structs::market::instrument::Instrument>,
+    instruments: &std::collections::HashSet<
+        proper_ma_structs::structs::market::instrument::Instrument,
+    >,
 ) -> Vec<futures::future::BoxFuture<'static, ()>> {
     use futures_util::StreamExt;
 
     let mut rt = Vec::<futures::future::BoxFuture<'static, ()>>::new();
 
-    let spot_instruments: Vec<&proper_ma_structs::structs::market::instrument::Instrument> = instruments
-        .iter()
-        .filter(|i| i.instrument_type == proper_ma_structs::structs::market::instrument::InstrumentType::Spot)
-        .collect();
+    let spot_instruments: Vec<&proper_ma_structs::structs::market::instrument::Instrument> =
+        instruments
+            .iter()
+            .filter(|i| {
+                i.instrument_type
+                    == proper_ma_structs::structs::market::instrument::InstrumentType::Spot
+            })
+            .collect();
     for bbo_url in get_spot_bbo_links(&spot_instruments).into_iter() {
         let sender_clone = sender.clone();
 
         let awork = crate::util::websocket::awork(
             bbo_url,
             futures::stream::iter(vec![]).fuse(),
-            bbo::wss(sender_clone), 
+            bbo::wss(sender_clone),
             bbo::State,
         );
         rt.push(Box::pin(awork));

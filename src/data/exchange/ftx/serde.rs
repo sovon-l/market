@@ -15,21 +15,24 @@ pub fn de_inst(s: &str) -> Option<proper_ma_structs::structs::market::instrument
                 exchange: proper_ma_structs::structs::market::exchange::Exchange::Ftx,
                 base: de_ccy(base),
                 quote: de_ccy("usd"),
-                instrument_type: proper_ma_structs::structs::market::instrument::InstrumentType::Future(None),
+                instrument_type:
+                    proper_ma_structs::structs::market::instrument::InstrumentType::Future(None),
             })
         } else if quote.chars().next().unwrap().is_digit(10) {
             Some(proper_ma_structs::structs::market::instrument::Instrument {
                 exchange: proper_ma_structs::structs::market::exchange::Exchange::Ftx,
                 base: de_ccy(base),
                 quote: de_ccy("usd"),
-                instrument_type: proper_ma_structs::structs::market::instrument::InstrumentType::Future(Some(0)), // TODO: mmdd to unix epoch
+                instrument_type:
+                    proper_ma_structs::structs::market::instrument::InstrumentType::Future(Some(0)), // TODO: mmdd to unix epoch
             })
         } else {
             Some(proper_ma_structs::structs::market::instrument::Instrument {
                 exchange: proper_ma_structs::structs::market::exchange::Exchange::Ftx,
                 base: de_ccy(base),
                 quote: de_ccy(quote),
-                instrument_type: proper_ma_structs::structs::market::instrument::InstrumentType::Future(None),
+                instrument_type:
+                    proper_ma_structs::structs::market::instrument::InstrumentType::Future(None),
             })
         }
     } else {

@@ -30,19 +30,19 @@
 // }
 
 fn main() {
-//     simple_logger::init_with_level(log::Level::Debug).unwrap();
+    //     simple_logger::init_with_level(log::Level::Debug).unwrap();
 
-//     let m = std::sync::Arc::new(std::sync::Mutex::new(zmq::Context::new()));
+    //     let m = std::sync::Arc::new(std::sync::Mutex::new(zmq::Context::new()));
 
-//     let ctx = m.lock().unwrap();
+    //     let ctx = m.lock().unwrap();
 
-//     let subscriber = ctx.socket(zmq::SUB).unwrap();
-//     subscriber.connect("tcp://127.0.0.1:8000").unwrap();
+    //     let subscriber = ctx.socket(zmq::SUB).unwrap();
+    //     subscriber.connect("tcp://127.0.0.1:8000").unwrap();
 
-//     messenger::subscriber::subscriber_loop(
-//         subscriber,
-//         market::api::market_listener::MarketListener {
-//             inner: LatencyListener {},
-//         },
-//     );
+    //     messenger::subscriber::subscriber_loop(
+    //         subscriber,
+    //         market::api::market_listener::MarketListener {
+    //             inner: LatencyListener {},
+    //         },
+    //     );
 }
